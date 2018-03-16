@@ -41,7 +41,7 @@ Switch system is mobile Cashier backend sale system for merchants, which provide
 * Loyalty (Voucher) system services - providing GiftCards selling and GiftCard payment method for attracting customers.
 * Sales history with the possibility to invoke actions (like Reversal, Refund, Receipt generation, etc.)
 * Possibility to communicate with HSM module for data decryption and reencryption
-* Terminals supported: Spire SPm2, Spire Posmate, bbpos Chipper, IDTECH UnimagPro, Miura (HSM is needed)
+* Terminals supported: Spire SPm2
 
 Find more information about Switch in the [Switch Fact Sheet](https://github.com/WirecardMobileServices/Wirecard-ePOS-iOS/blob/master/docs/Fact-Sheet-ePOS.pdf) and [Switch ePOS backend overview](https://github.com/WirecardMobileServices/Wirecard-ePOS-iOS/blob/master/docs/SWITCH-Overview.pdf)
 
