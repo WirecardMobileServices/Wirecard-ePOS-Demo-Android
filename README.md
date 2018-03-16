@@ -96,16 +96,8 @@ The Switch ePOS backend documentation:
 * Android Studio
 * Device running Android > 4.0 (API 14 - Ice Cream Sandwich)
 * One of Wirecard approved terminals, printers, cash drawers, barcode scanners
-	* IDTech [Unimag Pro](http://www.idtechproducts.com/products/mobile-readers/126.html "Unimag Pro")
-	* BBPOS [WisePad 2](https://bbpos.com/wisepad-2/ "WisePad 2")
-	* BBPOS [WisePad 2 Plus](https://bbpos.com/wisepad-2-plus/ "WisePad 2 Plus")
-	* Spire [PosMate](http://www.spirepayments.com/product/posmate/ "PosMate")
 	* Spire [SPm2](http://www.spirepayments.com/product/spm2/ "SPm2")
 	* Datecs printer [DPP-250](http://www.datecs.bg/en/products/DPP-250/2/175 "DPP-250")
-	* StarMicronics [TSP650](http://www.starmicronics.com/pages/TSP650-Series "TSP650")
-	* StarMicronics [mPOP](http://www.starmicronics.com/pages/mPOP "mPOP") 	* StarMicronics [SMD2](http://www.starmicronics.com/pages/SMD2-1214 "SMD2")
-	* SocketMobile [Series 7](https://www.socketmobile.com/products/series-7/series-7-colorful/overview "Series 7")
-
 
 ## Authors
 
