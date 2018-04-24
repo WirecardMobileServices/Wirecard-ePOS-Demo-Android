@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view"
+    >
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/payment"
+            android:icon="@drawable/ic_shopping_cart_black_24dp"
+            android:title="@string/payment"
+            />
+        <item
+            android:id="@+id/sales"
+            android:icon="@drawable/ic_account_balance_wallet_black_24dp"
+            android:title="@string/sales"
+            />
+        <item
+            android:id="@+id/shifts"
+            android:icon="@drawable/ic_work_black_24dp"
+            android:title="@string/shifts"
+            />
+        <item
+            android:id="@+id/products"
+            android:icon="@drawable/ic_image_black_24dp"
+            android:title="@string/products"
+            />
+        <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/settings"
+            />
+    </group>
+
+</menu>

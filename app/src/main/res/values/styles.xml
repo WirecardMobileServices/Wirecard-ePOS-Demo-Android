@@ -1,0 +1,57 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="BaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme" parent="BaseTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="MenuItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingLeft">32dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingStart">32dp</item>
+        <item name="android:paddingTop">20dp</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="DetailTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textSize">@dimen/detail_title_font_size</item>
+        <item name="android:background">@drawable/detail_title</item>
+    </style>
+
+    <style name="CalculatorButton" parent="Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textSize">@dimen/calc_font_size</item>
+    </style>
+
+    <style name="ActionButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">@dimen/action_button_font_padding</item>
+        <item name="android:paddingBottom">@dimen/action_button_font_padding</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">@dimen/action_button_font_size</item>
+    </style>
+
+</resources>

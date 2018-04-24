@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">EposDemo</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Wirecard ePOS SDK</string>
+    <string name="nav_header_subtitle">mpos-svk@wirecard.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="payment">Payment</string>
+    <string name="sales">Sales</string>
+    <string name="shifts">Shifts</string>
+    <string name="products">Products</string>
+    <string name="settings">Settings</string>
+    <string name="not_found">Not found</string>
+    <string name="cash">Cash</string>
+    <string name="card">Card</string>
+    <string name="receipt">Receipt</string>
+    <string name="refund">Refund</string>
+    <string name="open">Open</string>
+    <string name="close">Open</string>
+    <string name="pay_in">Pay in</string>
+    <string name="pay_out">Pay out</string>
+    <string name="sale_ok">Sale was successful\n\nCreating receipt…</string>
+    <string name="none">--</string>
+    <string name="terminal">Terminal</string>
+    <string name="printer">Printer</string>
+    <string name="cash_register">Cash Register</string>
+</resources>

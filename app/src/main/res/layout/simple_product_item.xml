@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="150dp"
+    android:layout_height="140dp"
+    android:padding="8dp"
+    >
+
+    <android.support.v7.widget.CardView android:id="@+id/card_view"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        card_view:cardCornerRadius="8dp"
+        >
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/product_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            app:riv_corner_radius_bottom_left="8dp"
+            app:riv_corner_radius_bottom_right="8dp"
+            app:riv_corner_radius_top_left="8dp"
+            app:riv_corner_radius_top_right="8dp"
+            tools:src="@mipmap/ic_launcher"
+            />
+
+        <TextView
+            android:id="@+id/product_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@drawable/image_rounded"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:lines="2"
+            android:padding="8dp"
+            android:textColor="#FFF"
+            android:textSize="16sp"
+            tools:text="Some product name which can be pretty long"
+            />
+
+    </android.support.v7.widget.CardView>
+
+</android.support.constraint.ConstraintLayout>

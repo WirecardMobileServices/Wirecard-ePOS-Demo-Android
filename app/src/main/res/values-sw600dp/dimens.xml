@@ -1,0 +1,9 @@
+<resources>
+    <dimen name="calc_font_size">32sp</dimen>
+    <dimen name="detail_title_font_size">52sp</dimen>
+    <dimen name="action_button_font_size">20sp</dimen>
+    <dimen name="action_button_font_padding">32dp</dimen>
+    <dimen name="receipt_width">450dp</dimen>
+
+    <integer name="product_columns">4</integer>
+</resources>
