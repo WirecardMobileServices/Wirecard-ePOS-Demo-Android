@@ -5,15 +5,24 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.threeten.bp.format.DateTimeFormatter;
+
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import de.wirecard.epos.exceptions.EposException;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+
+import static de.wirecard.eposdemo.EposSdkApplication.CURRENCY;
+import static de.wirecard.eposdemo.EposSdkApplication.FRACTION_DIGITS;
 
 public class AbsFragment<CONTENT extends View> extends Fragment {
 
@@ -22,6 +31,17 @@ public class AbsFragment<CONTENT extends View> extends Fragment {
     protected ProgressBar loading;
     protected TextView error;
     protected CONTENT content;
+
+    protected final NumberFormat nf;
+    protected final DateTimeFormatter formatter;
+
+    public AbsFragment() {
+        nf = NumberFormat.getCurrencyInstance(Locale.getDefault());
+        nf.setCurrency(CURRENCY);
+        nf.setMinimumFractionDigits(FRACTION_DIGITS);
+
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    }
 
     protected void addDisposable(Disposable disposable) {
         disposables.add(disposable);
@@ -65,26 +85,42 @@ public class AbsFragment<CONTENT extends View> extends Fragment {
             Toast.makeText(getContext(), "Couldn't find recycler view", Toast.LENGTH_LONG).show();
     }
 
+    protected void showError(@Nullable String message) {
+        if (loading != null)
+            loading.setVisibility(View.GONE);
+        if (content != null)
+            content.setVisibility(View.GONE);
+        if (error != null) {
+            if (!TextUtils.isEmpty(message))
+                error.setText(message);
+            error.setVisibility(View.VISIBLE);
+        }
+    }
+
     protected Consumer<? super Throwable> showErrorInsteadContent() {
         return throwable -> {
             throwable.printStackTrace();
-            if (loading != null)
-                loading.setVisibility(View.GONE);
-            if (content != null)
-                content.setVisibility(View.GONE);
+            showError(null);
 
             if (error != null) {
                 error.setVisibility(View.VISIBLE);
-                String errorMessage;
-                if (throwable instanceof EposException && getContext() != null)
-                    errorMessage = ((EposException) throwable).getMessage(getContext());
-                else
-                    errorMessage = throwable.toString();
-                error.setText(errorMessage);
+                error.setText(getErrorMessage(throwable));
             }
             else
                 Toast.makeText(getContext(), throwable.toString(), Toast.LENGTH_LONG).show();
         };
+    }
+
+    public String getErrorMessage(Throwable throwable) {
+        throwable.printStackTrace();
+        String errorMessage;
+        if (throwable instanceof EposException && getContext() != null)
+            errorMessage = ((EposException) throwable).getMessage(getContext());
+        else if (throwable.getCause() instanceof EposException && getContext() != null)
+            errorMessage = ((EposException) throwable.getCause()).getMessage(getContext());
+        else
+            errorMessage = throwable.toString();
+        return errorMessage;
     }
 
     @Override

@@ -1,6 +1,9 @@
 package de.wirecard.eposdemo;
 
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,17 +17,25 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.bumptech.glide.Glide;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Request;
+import com.squareup.picasso.RequestHandler;
 
+import java.io.IOException;
 import java.util.List;
 
 import de.wirecard.epos.InventoryManager;
 import de.wirecard.epos.model.inventory.Filter;
+import de.wirecard.epos.model.inventory.ProductImage;
 import de.wirecard.eposdemo.adapter.SimpleItem;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 
 public class ProductsFragment extends AbsFragment<RecyclerView> {
+
+    private static final String EPOS_SDK_URI = "eposSKD://productCatalogueImage/";
+
+    private Picasso picasso;
 
     public ProductsFragment() {
     }
@@ -38,13 +49,17 @@ public class ProductsFragment extends AbsFragment<RecyclerView> {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Picasso.Builder picassoBuilder = new Picasso.Builder(getContext());
+        picassoBuilder.addRequestHandler(new EposPicassoRequestHandler());
+        picasso = picassoBuilder.build();
+
         content.setLayoutManager(new GridLayoutManager(getContext(), getResources().getInteger(R.integer.product_columns)));
         final InventoryManager inventory = EposSdkApplication.getEposSdk().inventory();
         addDisposable(inventory
                 .getCatalogues()
                 .map(catalogues -> catalogues.get(0))
                 .flatMap(catalogue -> inventory.getProducts(catalogue.getId(), new Filter()))
-                .map(products -> Stream.of(products).map(it -> new SimpleItem(it.getName(), it.getCatalogue().getId(), it.getId())).collect(Collectors.toList()))
+                .map(products -> Stream.of(products).map(it -> new SimpleItem(it.getName(), it.getCatalogue().getId(), it.getId(), null)).collect(Collectors.toList()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(products -> loadingFinishedAndShowRecycler(new ProductAdapter(products)), showErrorInsteadContent())
         );
@@ -67,22 +82,12 @@ public class ProductsFragment extends AbsFragment<RecyclerView> {
         @Override
         public void onBindViewHolder(@NonNull ProductHolder holder, int position) {
             final SimpleItem item = values.get(position);
-            Glide.with(ProductsFragment.this).clear(holder.productImage);
-            holder.productImage.setImageResource(R.drawable.image_empty);
-
-            addDisposable(EposSdkApplication.getEposSdk()
-                    .inventory()
-                    .getProductImage(item.getCenter(), item.getRight())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(productImage -> {
-                        if (holder.productImage.getVisibility() == View.VISIBLE)
-                            Glide.with(ProductsFragment.this)
-                                    .load(productImage.getData())
-                                    .into(holder.productImage);
-                    }, throwable -> {
-                    })
-            );
-            holder.productName.setText(item.getLeft());
+            picasso.load(Uri.parse(EPOS_SDK_URI + item.getText2() + "/" + item.getText3()))
+                    .fit()
+                    .centerCrop()
+                    .placeholder(R.drawable.image_empty)
+                    .into(holder.productImage);
+            holder.productName.setText(item.getText1());
         }
 
         @Override
@@ -108,6 +113,32 @@ public class ProductsFragment extends AbsFragment<RecyclerView> {
 
         public TextView getProductName() {
             return productName;
+        }
+    }
+
+    static class EposPicassoRequestHandler extends RequestHandler {
+
+        @Override
+        public boolean canHandleRequest(Request data) {
+            return data.uri.toString().startsWith(EPOS_SDK_URI);
+        }
+
+        @Nullable
+        @Override
+        public Result load(Request request, int networkPolicy) throws IOException {
+            final List<String> segments = request.uri.getPathSegments();
+            String catalogueId = segments.get(0);
+            String productId = segments.get(1);
+
+            final ProductImage productImage = EposSdkApplication.getEposSdk()
+                    .inventory()
+                    .getProductImage(catalogueId, productId)
+                    .blockingGet();
+
+            final byte[] data = productImage.getData();
+            final Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+            return new Result(bitmap, Picasso.LoadedFrom.NETWORK);
         }
     }
 }

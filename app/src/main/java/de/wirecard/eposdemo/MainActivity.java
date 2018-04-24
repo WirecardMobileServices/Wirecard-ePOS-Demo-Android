@@ -13,15 +13,22 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private int selectedMenu = -1;
 
     private TextView username;
+
+    private boolean doubleClick = false;
 
     private CompositeDisposable disposables = new CompositeDisposable();
 
@@ -31,8 +38,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            toolbar.setTitle(getTitle());
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer != null) {
@@ -71,6 +80,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        }
+        else if (getSupportFragmentManager().getBackStackEntryCount() == 0 && isTaskRoot()) {
+            if (doubleClick) {
+                super.onBackPressed();
+                return;
+            }
+            this.doubleClick = true;
+            Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT).show();
+            disposables.add(Completable.complete().delay(2, TimeUnit.SECONDS).subscribe(() -> doubleClick = false, Timber::e));
         }
         else {
             super.onBackPressed();

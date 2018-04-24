@@ -9,15 +9,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 
-import org.threeten.bp.format.DateTimeFormatter;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashMap;
@@ -51,7 +49,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import timber.log.Timber;
 
-import static de.wirecard.eposdemo.EposSdkApplication.CURRENCY;
 import static de.wirecard.eposdemo.EposSdkApplication.FRACTION_DIGITS;
 
 
@@ -65,10 +62,9 @@ public class ReceiptFragment extends AbsFragment<WebView> {
 
     private static final boolean CUSTOMER_RECEIPT = false;
 
-    private final NumberFormat nf;
-    private final DateTimeFormatter formatter;
-
     private View loadingReceiptAfterSale;
+    private View print_fab;
+    private PrintableReceipt printableReceipt;
 
     public static ReceiptFragment newInstance(String saleId) {
         return newInstance(saleId, false);
@@ -88,11 +84,6 @@ public class ReceiptFragment extends AbsFragment<WebView> {
     }
 
     public ReceiptFragment() {
-        nf = NumberFormat.getCurrencyInstance(Locale.getDefault());
-        nf.setCurrency(CURRENCY);
-        nf.setMinimumFractionDigits(FRACTION_DIGITS);
-
-        formatter = DateTimeFormatter.ofPattern("dd.MM. HH:mm");
     }
 
     @Override
@@ -115,6 +106,18 @@ public class ReceiptFragment extends AbsFragment<WebView> {
 
         loadingReceiptAfterSale = view.findViewById(R.id.loading_receipt);
 
+        print_fab = view.findViewById(R.id.print_fab);
+        print_fab.setOnClickListener(v -> {
+            if (printableReceipt != null) {
+                addDisposable(EposSdkApplication.getEposSdk()
+                        .printer()
+                        .print(printableReceipt)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> Toast.makeText(getContext(), "Print successful", Toast.LENGTH_LONG).show(), showErrorInsteadContent())
+                );
+            }
+        });
+
         addDisposable(
                 EposSdkApplication.getEposSdk()
                         .sales()
@@ -127,6 +130,9 @@ public class ReceiptFragment extends AbsFragment<WebView> {
                             loadingFinished();
                         }, showErrorInsteadContent())
         );
+
+        if (!afterSale)
+            loadingReceiptAfterSale.setVisibility(View.GONE);
     }
 
     @Override
@@ -134,6 +140,7 @@ public class ReceiptFragment extends AbsFragment<WebView> {
         super.showLoading();
         if (afterSale)
             loadingReceiptAfterSale.setVisibility(View.VISIBLE);
+        print_fab.setVisibility(View.GONE);
     }
 
     @Override
@@ -141,6 +148,7 @@ public class ReceiptFragment extends AbsFragment<WebView> {
         super.loadingFinished();
         if (afterSale)
             loadingReceiptAfterSale.setVisibility(View.GONE);
+        print_fab.setVisibility(View.VISIBLE);
     }
 
     private Single<PrintableReceipt> preparePrintableReceipt(Sale sale) {
@@ -405,6 +413,7 @@ public class ReceiptFragment extends AbsFragment<WebView> {
             pr.setDisplayBarcodeLabel(true);
             pr.setHasNext(false);
 
+            printableReceipt = pr;
             return pr;
         });
     }

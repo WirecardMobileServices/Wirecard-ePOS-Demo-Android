@@ -8,26 +8,32 @@ import de.wirecard.eposdemo.R;
 
 public class SimpleItemViewHolder extends RecyclerView.ViewHolder {
 
-    private final TextView left;
-    private final TextView center;
-    private final TextView right;
+    private final TextView text1;
+    private final TextView text2;
+    private final TextView text3;
+    private final TextView text4;
 
     public SimpleItemViewHolder(View itemView) {
         super(itemView);
-        left = itemView.findViewById(R.id.text1);
-        center = itemView.findViewById(R.id.text2);
-        right = itemView.findViewById(R.id.text3);
+        text1 = itemView.findViewById(R.id.text1);
+        text2 = itemView.findViewById(R.id.text2);
+        text3 = itemView.findViewById(R.id.text3);
+        text4 = itemView.findViewById(R.id.text4);
     }
 
-    public TextView getLeft() {
-        return left;
+    public TextView getText1() {
+        return text1;
     }
 
-    public TextView getCenter() {
-        return center;
+    public TextView getText2() {
+        return text2;
     }
 
-    public TextView getRight() {
-        return right;
+    public TextView getText3() {
+        return text3;
+    }
+
+    public TextView getText4() {
+        return text4;
     }
 }

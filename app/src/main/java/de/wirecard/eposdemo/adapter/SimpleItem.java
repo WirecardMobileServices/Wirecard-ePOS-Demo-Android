@@ -4,31 +4,39 @@ import android.support.annotation.Nullable;
 
 public class SimpleItem {
     @Nullable
-    private final String left;
+    private final String text1;
     @Nullable
-    private final String center;
+    private final String text2;
     @Nullable
-    private final String right;
+    private final String text3;
+    @Nullable
+    private final String text4;
 
-    public SimpleItem(@Nullable String left, @Nullable String center, @Nullable String right) {
-        this.left = left;
-        this.center = center;
-        this.right = right;
+    public SimpleItem(@Nullable String text1, @Nullable String text2, @Nullable String text3, @Nullable String text4) {
+        this.text1 = text1;
+        this.text2 = text2;
+        this.text3 = text3;
+        this.text4 = text4;
     }
 
     @Nullable
-    public String getLeft() {
-        return left;
+    public String getText1() {
+        return text1;
     }
 
     @Nullable
-    public String getCenter() {
-        return center;
+    public String getText2() {
+        return text2;
     }
 
     @Nullable
-    public String getRight() {
-        return right;
+    public String getText3() {
+        return text3;
+    }
+
+    @Nullable
+    public String getText4() {
+        return text4;
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
@@ -39,16 +47,18 @@ public class SimpleItem {
 
         SimpleItem that = (SimpleItem) o;
 
-        if (left != null ? !left.equals(that.left) : that.left != null) return false;
-        if (center != null ? !center.equals(that.center) : that.center != null) return false;
-        return right != null ? right.equals(that.right) : that.right == null;
+        if (text1 != null ? !text1.equals(that.text1) : that.text1 != null) return false;
+        if (text2 != null ? !text2.equals(that.text2) : that.text2 != null) return false;
+        if (text3 != null ? !text3.equals(that.text3) : that.text3 != null) return false;
+        return text4 != null ? text4.equals(that.text4) : that.text4 == null;
     }
 
     @Override
     public int hashCode() {
-        int result = left != null ? left.hashCode() : 0;
-        result = 31 * result + (center != null ? center.hashCode() : 0);
-        result = 31 * result + (right != null ? right.hashCode() : 0);
+        int result = text1 != null ? text1.hashCode() : 0;
+        result = 31 * result + (text2 != null ? text2.hashCode() : 0);
+        result = 31 * result + (text3 != null ? text3.hashCode() : 0);
+        result = 31 * result + (text4 != null ? text4.hashCode() : 0);
         return result;
     }
 
@@ -56,9 +66,10 @@ public class SimpleItem {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SimpleItem{");
-        sb.append("left='").append(left).append('\'');
-        sb.append(", center='").append(center).append('\'');
-        sb.append(", right='").append(right).append('\'');
+        sb.append("text1='").append(text1).append('\'');
+        sb.append(", text2='").append(text2).append('\'');
+        sb.append(", text3='").append(text3).append('\'');
+        sb.append(", text4='").append(text4).append('\'');
         sb.append('}');
         return sb.toString();
     }

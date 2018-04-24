@@ -16,7 +16,7 @@
     <string name="receipt">Receipt</string>
     <string name="refund">Refund</string>
     <string name="open">Open</string>
-    <string name="close">Open</string>
+    <string name="close">Close</string>
     <string name="pay_in">Pay in</string>
     <string name="pay_out">Pay out</string>
     <string name="sale_ok">Sale was successful\n\nCreating receipt…</string>
@@ -24,4 +24,7 @@
     <string name="terminal">Terminal</string>
     <string name="printer">Printer</string>
     <string name="cash_register">Cash Register</string>
+    <string name="settings_note">Click for select, long click for remove</string>
+    <string name="cash_register_error">You have to select cash register in settings</string>
+    <string name="cancel">Cancel</string>
 </resources>

@@ -4,23 +4,43 @@ package de.wirecard.eposdemo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
+
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import de.wirecard.epos.model.cashregisters.cashoperations.CashOperationInit;
+import de.wirecard.epos.model.cashregisters.cashoperations.CashOperationType;
+import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftClose;
+import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftLight;
+import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftOpen;
+import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftStatus;
+import de.wirecard.epos.model.cashregisters.shift.Filter;
+import de.wirecard.epos.model.cashregisters.shift.Order;
 import de.wirecard.eposdemo.adapter.SimpleItem;
 import de.wirecard.eposdemo.adapter.SimpleItemRecyclerViewAdapter;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+
+import static de.wirecard.eposdemo.EposSdkApplication.CURRENCY;
 
 
 public class ShiftsFragment extends AbsFragment<RecyclerView> {
+
+    private List<CashRegisterShiftLight> cashRegisterShiftLights;
+
+    private Button openClose;
+    private Button payIn, payOut;
 
     public ShiftsFragment() {
     }
@@ -35,29 +55,224 @@ public class ShiftsFragment extends AbsFragment<RecyclerView> {
         super.onViewCreated(view, savedInstanceState);
 
         content.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        openClose = view.findViewById(R.id.open_close);
+        openClose.setOnClickListener(v -> {
+            if (Settings.getCashRegisterId(getContext()) == null) {
+                Toast.makeText(getContext(), R.string.cash_register_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!isLastShiftOpen()) {
+                doOpen();
+            }
+            else {
+                doClose();
+            }
+        });
+
+        payIn = view.findViewById(R.id.pay_in);
+        payIn.setOnClickListener(v -> {
+            if (Settings.getCashRegisterId(getContext()) == null) {
+                Toast.makeText(getContext(), R.string.cash_register_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            doPayInOut(true);
+
+        });
+
+        payOut = view.findViewById(R.id.pay_out);
+        payOut.setOnClickListener(v -> {
+            if (Settings.getCashRegisterId(getContext()) == null) {
+                Toast.makeText(getContext(), R.string.cash_register_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            doPayInOut(false);
+        });
+
+        loadShifts();
+    }
+
+    private void doOpen() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(R.string.open);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_open_close, null);
+        builder.setView(dialogView);
+        final EditText amountEditText = dialogView.findViewById(R.id.amount);
+        final EditText noteEditText = dialogView.findViewById(R.id.note);
+        builder.setPositiveButton(R.string.open, (dialog, which) -> {
+            BigDecimal amount = BigDecimal.TEN;
+            String note = "Demo shift";
+            try {
+                amount = new BigDecimal(amountEditText.getText().toString());
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Wrong input, opening with 10 €", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+            try {
+                note = noteEditText.getText().toString();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Wrong input, changing note to 'Demo shift'", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+
+            showLoading();
+            addDisposable(
+                    EposSdkApplication.getEposSdk()
+                            .cash()
+                            .openCashRegisterShift(Settings.getCashRegisterId(getContext()), new CashRegisterShiftOpen(amount, note))
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(shift -> loadShifts(), showErrorInsteadContent())
+            );
+        });
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> {
+        });
+        builder.show();
+    }
+
+    private void doClose() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(R.string.close);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_open_close, null);
+        builder.setView(dialogView);
+        final EditText amountEditText = dialogView.findViewById(R.id.amount);
+        final EditText noteEditText = dialogView.findViewById(R.id.note);
+        builder.setPositiveButton(R.string.close, (dialog, which) -> {
+            BigDecimal amount = BigDecimal.TEN;
+            String note = "Demo shift";
+            try {
+                amount = new BigDecimal(amountEditText.getText().toString());
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Wrong input, opening with 10 €", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+            try {
+                note = noteEditText.getText().toString();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Wrong input, changing note to 'Demo shift'", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+
+            showLoading();
+            addDisposable(
+                    EposSdkApplication.getEposSdk()
+                            .cash()
+                            .closeCashRegisterShift(Settings.getCashRegisterId(getContext()), new CashRegisterShiftClose(amount, note))
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(shift -> loadShifts(), showErrorInsteadContent())
+            );
+        });
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> {
+        });
+        builder.show();
+    }
+
+    private void doPayInOut(boolean payIn) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(payIn ? R.string.pay_in : R.string.pay_out);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_open_close, null);
+        builder.setView(dialogView);
+        final EditText amountEditText = dialogView.findViewById(R.id.amount);
+        final EditText noteEditText = dialogView.findViewById(R.id.note);
+        builder.setPositiveButton(payIn ? R.string.pay_in : R.string.pay_out, (dialog, which) -> {
+            BigDecimal amount = BigDecimal.TEN;
+            String note = "Demo shift";
+            try {
+                amount = new BigDecimal(amountEditText.getText().toString());
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Wrong input, amount changed to 10 €", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+            try {
+                note = noteEditText.getText().toString();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Wrong input, changing note to 'Demo shift'", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+
+            showLoading();
+            addDisposable(
+                    EposSdkApplication.getEposSdk()
+                            .cash()
+                            .createCashOperation(Settings.getCashRegisterId(getContext()), new CashOperationInit(amount, CURRENCY, note, payIn ? CashOperationType.CASH_IN : CashOperationType.CASH_OUT))
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(shift -> {
+                                Toast.makeText(getContext(), String.format("%s was successful", payIn ? getString(R.string.pay_in) : getString(R.string.pay_out)), Toast.LENGTH_SHORT)
+                                        .show();
+                                loadShifts();
+                            }, showErrorInsteadContent())
+            );
+        });
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> {
+        });
+        builder.show();
+    }
+
+    private void loadShifts() {
+        if (Settings.getCashRegisterId(getContext()) == null) {
+            showError(getString(R.string.cash_register_error));
+            return;
+        }
+        showLoading();
         addDisposable(
-                Single.fromCallable(() -> {
-                    List<SimpleItem> shiftItems = new ArrayList<>();
-                    shiftItems.add(new SimpleItem("1: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("2: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("3: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("4: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("5: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("6: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("7: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("8: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("9: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("10: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("11: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("12: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("13: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("14: left", "center", "right"));
-                    shiftItems.add(new SimpleItem("15: left", "center", "right"));
-                    return shiftItems;
-                })
-                        .delay(1, TimeUnit.SECONDS)
+                EposSdkApplication.getEposSdk()
+                        .cash()
+                        .getCashRegisterShifts(Settings.getCashRegisterId(getContext()), new Filter(20, new Order().closeTime().desc()))
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(shiftItems -> loadingFinishedAndShowRecycler(new SimpleItemRecyclerViewAdapter(shiftItems)), showErrorInsteadContent())
+                        .subscribe(items -> {
+                            cashRegisterShiftLights = items;
+                            final List<SimpleItem> simpleItems = Stream.of(items)
+                                    .map(item ->
+                                            new SimpleItem(
+                                                    formatter.format(item.getOpenTime()),
+                                                    item.getStatus().toString(),
+                                                    item.getClosingAmount() != null ? nf.format(item.getClosingAmount()) : getString(R.string.none),
+                                                    item.getCloseTime() != null ? formatter.format(item.getCloseTime()) : null
+                                            )
+                                    ).collect(Collectors.toList());
+                            loadingFinishedAndShowRecycler(new SimpleItemRecyclerViewAdapter(simpleItems, false));
+                            refresh();
+                        }, showErrorInsteadContent())
         );
+    }
+
+    private void refresh() {
+        if (isLastShiftOpen()) {
+            payIn.setEnabled(true);
+            payOut.setEnabled(true);
+            openClose.setText(R.string.close);
+        }
+        else {
+            payIn.setEnabled(false);
+            payOut.setEnabled(false);
+            openClose.setText(R.string.open);
+        }
+    }
+
+    private boolean isLastShiftOpen() {
+        return cashRegisterShiftLights != null && cashRegisterShiftLights.size() != 0 && cashRegisterShiftLights.get(0).getStatus() == CashRegisterShiftStatus.OPEN;
+    }
+
+    @Override
+    protected void showLoading() {
+        super.showLoading();
+        openClose.setEnabled(false);
+        payIn.setEnabled(false);
+        payOut.setEnabled(false);
+    }
+
+    @Override
+    protected void showError(@Nullable String message) {
+        super.showError(message);
+        openClose.setEnabled(false);
+        payIn.setEnabled(false);
+        payOut.setEnabled(false);
+    }
+
+    @Override
+    protected void loadingFinished() {
+        super.loadingFinished();
+        openClose.setEnabled(true);
+        payIn.setEnabled(true);
+        payOut.setEnabled(true);
     }
 }
