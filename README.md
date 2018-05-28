@@ -87,7 +87,7 @@ All the necessary information can be found on [Wirecard ePOS Developer Portal](h
 The Switch ePOS backend documentation:
 
 * [Switch REST tests](https://switch-test.wirecard.com/mswitch-server/swagger/index.html)
-* [Switch Sale API](https://switch-test.wirecard.com/mswitch-server/doc/api-doc-Sale.html)
+* [Switch Sale API](https://switch-test.wirecard.com/mswitch-server/doc/api-doc-sale.html)
 
 
 ## Requirements
