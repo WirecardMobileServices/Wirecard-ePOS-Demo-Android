@@ -24,7 +24,9 @@ import de.wirecard.epos.TerminalManager;
 import de.wirecard.epos.extension.EposPublicExtension;
 import de.wirecard.epos.extension.printer.UninitializedPrinterDevice;
 import de.wirecard.epos.extension.terminal.UninitializedTerminalDevice;
-import de.wirecard.epos.model.cashregisters.CashRegisterLight;
+import de.wirecard.epos.model.cashregisters.CashRegister;
+import de.wirecard.epos.model.with.With;
+import de.wirecard.epos.model.with.WithPagination;
 import de.wirecard.epos.util.events.Event;
 import de.wirecard.epos.util.events.acceptance.AvailablePrinterTypesEvent;
 import de.wirecard.epos.util.events.acceptance.AvailablePrintersEvent;
@@ -202,20 +204,25 @@ public class SettingsFragment extends AbsFragment<LinearLayout> {
         });
 
         cashRegisterSelection = view.findViewById(R.id.cash_register_selection);
+        final WithPagination withPagination = With.pagination()
+                .includeResponseFields(
+                        "id",
+                        "name"
+                );
         cashRegisterSelection.setOnClickListener(v -> {
             showLoading();
             addDisposable(EposSdkApplication.getEposSdk()
                     .cash()
-                    .getCashRegistersLight()
+                    .getCashRegisters(withPagination)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(cashRegisterLights -> {
+                    .subscribe(cashRegisters -> {
                                 loadingFinished();
                                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                                 builder.setTitle(R.string.cash_register);
 
-                                final List<String> registerNames = Stream.of(cashRegisterLights).map(CashRegisterLight::getName).collect(Collectors.toList());
+                                final List<String> registerNames = Stream.of(cashRegisters).map(CashRegister::getName).collect(Collectors.toList());
                                 builder.setItems(registerNames.toArray(new CharSequence[registerNames.size()]), (dialog, which) -> {
-                                    final CashRegisterLight cashRegisterLight = cashRegisterLights.get(which);
+                                    final CashRegister cashRegisterLight = cashRegisters.get(which);
                                     Settings.setCashRegister(getContext(), cashRegisterLight.getId(), cashRegisterLight.getName());
                                     refresh();
                                 });

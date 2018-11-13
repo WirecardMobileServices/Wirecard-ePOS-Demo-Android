@@ -4,20 +4,29 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+
 import java.util.concurrent.TimeUnit;
 
+import de.wirecard.epos.exceptions.UnauthorizedException;
+import de.wirecard.epos.model.user.UserCredentials;
 import io.reactivex.Completable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import timber.log.Timber;
@@ -53,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        username = findViewById(R.id.username);
+        username = findViewById(R.id.usernameLayout);
 
         if (savedInstanceState != null)
             selectedMenu = savedInstanceState.getInt("selectedMenu");
@@ -62,14 +71,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.setCheckedItem(selectedMenu);
         changeScreen(selectedMenu);
-
         disposables.add(
                 EposSdkApplication.getEposSdk()
                         .user()
                         .getCurrentUser()
                         .observeOn(AndroidSchedulers.mainThread())
+                        .onErrorResumeNext(err -> Single.create(source -> {
+                            View view = getLayoutInflater().inflate(R.layout.dialog_login, null);
+                            ((TextInputLayout) view.findViewById(R.id.usernameLayout)).setError("Invalid username or password");
+                            ((TextInputLayout) view.findViewById(R.id.passwordLayout)).setError("Invalid username or password");
+                            new AlertDialog.Builder(this)
+                                    .setView(view)
+                                    .setCancelable(false)
+                                    .setPositiveButton("Login", (dialog, which) -> {
+                                        dialog.dismiss();
+                                        EposSdkApplication.getEposSdk().other()
+                                                .updateUserCredentials(new UserCredentials(
+                                                        ((TextInputEditText) view.findViewById(R.id.username)).getText().toString(),
+                                                        ((TextInputEditText) view.findViewById(R.id.password)).getText().toString()
+                                                ));
+                                        source.onError(err);
+                                    }).create()
+                                    .show();
+
+                        }))
+                        //unauthorized or empty credentials
+                        .retry(Long.MAX_VALUE, err -> err instanceof UnauthorizedException || err instanceof MismatchedInputException)
                         .subscribe(
-                                user -> username.setText(String.format("%s %s", user.getFirstName(), user.getLastName())),
+                                user -> {
+                                    username.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
+                                    if (!user.getMerchantShops().isEmpty())
+                                        Settings.setShopId(this, user.getMerchantShops().get(0).getId());
+                                    Settings.setLoggedUser(user);
+                                },
                                 error -> Log.e("MainActivity", error.toString())
                         )
         );

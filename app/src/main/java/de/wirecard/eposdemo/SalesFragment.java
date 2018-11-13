@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +19,16 @@ import java.util.Collections;
 import java.util.List;
 
 import de.wirecard.epos.model.sale.request.payment.cash.CashReturnPayment;
-import de.wirecard.epos.model.sale.sales.Filter;
-import de.wirecard.epos.model.sale.sales.Order;
+import de.wirecard.epos.model.sale.sales.Sale;
 import de.wirecard.epos.model.sale.sales.SaleItem;
 import de.wirecard.epos.model.sale.sales.SaleItemType;
-import de.wirecard.epos.model.sale.sales.SaleLight;
-import de.wirecard.epos.model.sale.sales.payment.PaymentLight;
+import de.wirecard.epos.model.sale.sales.payment.Payment;
+import de.wirecard.epos.model.sale.sales.payment.alipay.AlipayPayment;
+import de.wirecard.epos.model.sale.sales.payment.card.CardPayment;
+import de.wirecard.epos.model.sale.sales.payment.cash.CashPayment;
+import de.wirecard.epos.model.sale.sales.payment.wechat.WechatPayment;
+import de.wirecard.epos.model.with.With;
+import de.wirecard.epos.model.with.WithPagination;
 import de.wirecard.epos.util.TaxUtils;
 import de.wirecard.eposdemo.adapter.SimpleItem;
 import de.wirecard.eposdemo.adapter.SimpleItemRecyclerViewAdapter;
@@ -36,7 +39,7 @@ import static de.wirecard.eposdemo.EposSdkApplication.FRACTION_DIGITS;
 
 public class SalesFragment extends AbsFragment<RecyclerView> {
 
-    private List<SaleLight> saleLights;
+    private List<Sale> saleLights;
 
     private Button receipt;
     private Button refund;
@@ -79,11 +82,16 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
     }
 
     private void loadSales() {
+        WithPagination withPagination = With.pagination()
+                .page(0)
+                .size(20)
+                .sort("initialized", WithPagination.Order.DESC);
+
         showLoading();
         addDisposable(
                 EposSdkApplication.getEposSdk()
                         .sales()
-                        .getSales(new Filter(20, new Order().date().desc()))
+                        .getSales(withPagination)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(items -> {
                             saleLights = items;
@@ -100,35 +108,33 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
         );
     }
 
-    private String getCardholderNameOrType(SaleLight saleLight) {
-        final PaymentLight paymentLight = saleLight.getPayments().get(0);
-        if (!TextUtils.isEmpty(paymentLight.getCardHolderName()))
-            return paymentLight.getCardHolderName();
-        else {
-            final String type = paymentLight.getType();
-            String typeEscaped = null;
-            try {
-                typeEscaped = type.substring(0, type.indexOf("_"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return (typeEscaped != null ? typeEscaped : type).substring(0, 1).toUpperCase() + (typeEscaped != null ? typeEscaped : type).substring(1).toLowerCase();
-        }
+    private String getCardholderNameOrType(Sale sale) {
+        final Payment payment = sale.getPayments().get(0);
+        if (payment instanceof CardPayment)
+            return "Card";
+        if (payment instanceof CashPayment)
+            return "Cash";
+        if (payment instanceof AlipayPayment)
+            return "Alipay";
+        if (payment instanceof WechatPayment)
+            return "Wechat";
+        else return payment.getClass().getName();
+
     }
 
     private void doRefund() {
         showLoading();
         final int selectedPosition = ((SimpleItemRecyclerViewAdapter) content.getAdapter()).getSelectedPosition();
         if (selectedPosition > RecyclerView.NO_POSITION) {
-            final SaleLight saleLight = saleLights.get(selectedPosition);
+            final Sale sale = saleLights.get(selectedPosition);
             final List<SaleItem> returnItems = Collections.singletonList(new SaleItem(
                     SaleItemType.PURCHASE,
                     "Demo Item",
-                    saleLight.getTotalAmount(),
+                    sale.getTotalAmount(),
                     null,
                     BigDecimal.ONE,
-                    TaxUtils.calculateTaxAmount(saleLight.getTotalAmount(), new BigDecimal(19), true, FRACTION_DIGITS),
-                    saleLight.getTotalAmount(),
+                    TaxUtils.calculateTaxAmount(sale.getTotalAmount(), new BigDecimal(19), true, FRACTION_DIGITS),
+                    sale.getTotalAmount(),
                     null,
                     null,
                     null,
@@ -138,15 +144,17 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
                     EposSdkApplication.getEposSdk()
                             .sales()
                             .saleReturn(
-                                    Collections.singletonList(new CashReturnPayment(saleLight.getTotalAmount(), null)),
-                                    saleLight.getOriginalSaleId() != null ? saleLight.getOriginalSaleId() : saleLight.getId(),
+                                    new CashReturnPayment(sale.getTotalAmount(), null),
+                                    sale.getOriginalSaleId() != null ? sale.getOriginalSaleId() : sale.getId(),
                                     CURRENCY,
                                     returnItems,
                                     true,
-                                    Settings.getCashRegisterId(getContext())
+                                    Settings.getCashRegisterId(getContext()),
+                                    "saleNote",
+                                    Settings.getShopID(getActivity())
                             )
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(sale -> {
+                            .subscribe(sale1 -> {
                                 Toast.makeText(getContext(), "Return successful", Toast.LENGTH_SHORT).show();
                                 loadSales();
                             }, showErrorInsteadContent())

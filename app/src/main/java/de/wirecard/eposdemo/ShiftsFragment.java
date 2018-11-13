@@ -22,12 +22,12 @@ import java.util.List;
 
 import de.wirecard.epos.model.cashregisters.cashoperations.CashOperationInit;
 import de.wirecard.epos.model.cashregisters.cashoperations.CashOperationType;
+import de.wirecard.epos.model.cashregisters.shift.CashRegisterShift;
 import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftClose;
-import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftLight;
 import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftOpen;
 import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftStatus;
-import de.wirecard.epos.model.cashregisters.shift.Filter;
-import de.wirecard.epos.model.cashregisters.shift.Order;
+import de.wirecard.epos.model.with.With;
+import de.wirecard.epos.model.with.WithPagination;
 import de.wirecard.eposdemo.adapter.SimpleItem;
 import de.wirecard.eposdemo.adapter.SimpleItemRecyclerViewAdapter;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -37,7 +37,7 @@ import static de.wirecard.eposdemo.EposSdkApplication.CURRENCY;
 
 public class ShiftsFragment extends AbsFragment<RecyclerView> {
 
-    private List<CashRegisterShiftLight> cashRegisterShiftLights;
+    private List<CashRegisterShift> cashRegisterShifts;
 
     private Button openClose;
     private Button payIn, payOut;
@@ -213,13 +213,18 @@ public class ShiftsFragment extends AbsFragment<RecyclerView> {
             return;
         }
         showLoading();
+        WithPagination withPagination = With.pagination()
+                .page(0)
+                .size(20)
+                .includeResponseFields("id","openTime","closeTime","closingAmount","status")
+                .sort("closeTime", WithPagination.Order.DESC);
         addDisposable(
                 EposSdkApplication.getEposSdk()
                         .cash()
-                        .getCashRegisterShifts(Settings.getCashRegisterId(getContext()), new Filter(20, new Order().closeTime().desc()))
+                        .getCashRegisterShifts(Settings.getCashRegisterId(getContext()),withPagination)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(items -> {
-                            cashRegisterShiftLights = items;
+                            cashRegisterShifts = items;
                             final List<SimpleItem> simpleItems = Stream.of(items)
                                     .map(item ->
                                             new SimpleItem(
@@ -249,7 +254,7 @@ public class ShiftsFragment extends AbsFragment<RecyclerView> {
     }
 
     private boolean isLastShiftOpen() {
-        return cashRegisterShiftLights != null && cashRegisterShiftLights.size() != 0 && cashRegisterShiftLights.get(0).getStatus() == CashRegisterShiftStatus.OPEN;
+        return cashRegisterShifts != null && cashRegisterShifts.size() != 0 && cashRegisterShifts.get(0).getStatus() == CashRegisterShiftStatus.OPEN;
     }
 
     @Override

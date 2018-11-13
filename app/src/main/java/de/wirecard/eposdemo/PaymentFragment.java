@@ -129,11 +129,6 @@ public class PaymentFragment extends AbsFragment<View> {
     private void doPayment(boolean isCash, Relay<Event> eventRelay) {
         showLoading();
         final EposSDK eposSdk = EposSdkApplication.getEposSdk();
-        if (Settings.getCashRegisterId(getContext()) == null) {
-            Toast.makeText(getContext(), R.string.cash_register_error, Toast.LENGTH_LONG).show();
-            loadingFinished();
-            return;
-        }
 
         update.setVisibility(View.VISIBLE);
 
@@ -146,6 +141,14 @@ public class PaymentFragment extends AbsFragment<View> {
             optionalStep = paymentMethodStep.addCashPayment(amountValue);
         else
             optionalStep = paymentMethodStep.addCardPayment(amountValue);
+
+        if (Settings.isCashRegisterRequired())
+            if (Settings.getCashRegisterId(getContext()) == null) {
+                Toast.makeText(getContext(), R.string.cash_register_error, Toast.LENGTH_LONG).show();
+                loadingFinished();
+                return;
+            }else
+                optionalStep.setCashRegisterId(Settings.getCashRegisterId(getContext()));
 
         final SaleBuilder saleBuilder = optionalStep.setSaleItems(Collections.singletonList(new SaleItem(
                 SaleItemType.PURCHASE,
@@ -160,7 +163,6 @@ public class PaymentFragment extends AbsFragment<View> {
                 null,
                 null
         )))
-                .setCashRegisterId(Settings.getCashRegisterId(getContext()))
                 .build();
 
         addDisposable(

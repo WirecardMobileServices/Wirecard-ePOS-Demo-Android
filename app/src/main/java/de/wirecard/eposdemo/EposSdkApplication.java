@@ -17,7 +17,7 @@ public class EposSdkApplication extends MultiDexApplication {
     private static EposSDK eposSDK;
 
     private final static String USERNAME = "EposDemoUser";
-    private final static String PASSWORD = "Demo12345678!!";
+    private final static String PASSWORD = "Demo12345678!!!!!";
 
     public static final Currency CURRENCY = Currency.getInstance("EUR");
     public static final int FRACTION_DIGITS = CURRENCY.getDefaultFractionDigits();

@@ -25,10 +25,12 @@ import java.io.IOException;
 import java.util.List;
 
 import de.wirecard.epos.InventoryManager;
-import de.wirecard.epos.model.inventory.Filter;
 import de.wirecard.epos.model.inventory.ProductImage;
+import de.wirecard.epos.model.with.With;
+import de.wirecard.epos.model.with.WithPagination;
 import de.wirecard.eposdemo.adapter.SimpleItem;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class ProductsFragment extends AbsFragment<RecyclerView> {
@@ -55,10 +57,15 @@ public class ProductsFragment extends AbsFragment<RecyclerView> {
 
         content.setLayoutManager(new GridLayoutManager(getContext(), getResources().getInteger(R.integer.product_columns)));
         final InventoryManager inventory = EposSdkApplication.getEposSdk().inventory();
+
+        WithPagination filter = With.pagination()
+                .page(0)
+                .size(20)
+                .scheduler(Schedulers.io());
         addDisposable(inventory
                 .getCatalogues()
                 .map(catalogues -> catalogues.get(0))
-                .flatMap(catalogue -> inventory.getProducts(catalogue.getId(), new Filter()))
+                .flatMap(catalogue -> inventory.getProducts(catalogue.getId(), filter))
                 .map(products -> Stream.of(products).map(it -> new SimpleItem(it.getName(), it.getCatalogue().getId(), it.getId(), null)).collect(Collectors.toList()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(products -> loadingFinishedAndShowRecycler(new ProductAdapter(products)), showErrorInsteadContent())

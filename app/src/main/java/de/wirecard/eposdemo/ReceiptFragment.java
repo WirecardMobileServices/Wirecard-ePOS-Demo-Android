@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import de.wirecard.epos.extension.printer.model.PrintableAddress;
 import de.wirecard.epos.extension.printer.model.PrintableDetail;
+import de.wirecard.epos.extension.printer.model.PrintablePayment;
 import de.wirecard.epos.extension.printer.model.PrintableReceipt;
 import de.wirecard.epos.extension.printer.model.PrintableSaleItem;
 import de.wirecard.epos.extension.printer.model.TaxItem;
@@ -163,30 +165,29 @@ public class ReceiptFragment extends AbsFragment<WebView> {
                 pr.setMerchantName(sale.getMerchant().getName());
 
             // merchant address
-            StringBuilder sbAddress = new StringBuilder("");
-            if (!TextUtils.isEmpty(sale.getMerchant().getAddress().getStreet2()))
-                sbAddress.append(sale.getMerchant().getAddress().getStreet2()).append(" ");
-            if (!TextUtils.isEmpty(sale.getMerchant().getAddress().getStreet1()))
-                sbAddress.append(sale.getMerchant().getAddress().getStreet1()).append("\n");
-            if (!TextUtils.isEmpty(sale.getMerchant().getAddress().getPostalCode()))
-                sbAddress.append(sale.getMerchant().getAddress().getPostalCode());
-            if (!TextUtils.isEmpty(sale.getMerchant().getAddress().getCity()))
-                sbAddress.append(", ").append(sale.getMerchant().getAddress().getCity());
-            if (!TextUtils.isEmpty(sale.getMerchant().getAddress().getCountry().getName()))
-                sbAddress.append("\n").append(sale.getMerchant().getAddress().getCountry().getName());
-            pr.setAddress(sbAddress.toString());
+            pr.setAddress(new PrintableAddress(
+                    sale.getMerchant().getAddress().getStreet1(),
+                    sale.getMerchant().getAddress().getStreet2(),
+                    sale.getMerchant().getAddress().getCity(),
+                    sale.getMerchant().getAddress().getPostalCode(),
+                    sale.getMerchant().getAddress().getStateOrProvince(),
+                    sale.getMerchant().getAddress().getCountry().getName()
+                    )
+            );
 
             // merchant tax number
             if (!TextUtils.isEmpty(sale.getMerchant().getTaxNumber()))
-                pr.setMerchantTaxNumber(sale.getMerchant().getTaxNumber());
+                pr.setTaxNumber(sale.getMerchant().getTaxNumber());
 
             // receipt type: SALE or REFUND
             if (sale.getType() == SaleType.RETURN)
                 pr.setReceiptType("Refund");
             else if (sale.getStatus() == SaleStatus.CANCELED)
-                pr.setReceiptType("Reversed");
+                pr.setReceiptType("Reverse");
             else
                 pr.setReceiptType("Sale");
+
+            pr.setSaleStatus(sale.getStatus().name());
 
             // receipt number
             pr.setReceiptNumberLabel("Receipt number");
@@ -225,14 +226,14 @@ public class ReceiptFragment extends AbsFragment<WebView> {
             // items
             if (!sale.getItems().isEmpty()) {
                 // sale items
-                pr.setPrintableSaleItems(getPrintableSaleItems(purchaseSaleItems, EposSdkApplication.CURRENCY, Locale.getDefault()));
+                pr.setSaleItems(getPrintableSaleItems(purchaseSaleItems, EposSdkApplication.CURRENCY, Locale.getDefault()));
                 // taxation info row
                 if (taxInclusive)
-                    pr.setUnitPricesTaxation("Tax included");
+                    pr.setUnitPricesTaxation("Included");
                 else
-                    pr.setUnitPricesTaxation("Tax excluded");
+                    pr.setUnitPricesTaxation("Excluded");
                 // tax items
-                pr.setTaxPercentage("Tax");
+                pr.setTaxPercentage("Tax %");
                 pr.setNetto("Netto");
                 pr.setBrutto("Brutto");
                 pr.setTax("Tax");
@@ -267,26 +268,15 @@ public class ReceiptFragment extends AbsFragment<WebView> {
 
             //service charge
             if (serviceCharge != null) {
-                BigDecimal scTotalAmount;
-                BigDecimal scNetAmount = BigDecimal.ZERO;
-                scTotalAmount = serviceCharge.getItemTotal();
-
-                BigDecimal taxRate;
-                SaleItem sc = Stream.of(sale.getItems())
-                        .filter(item -> item.getType().equals(SaleItemType.SERVICE_CHARGE))
-                        .map(item -> item)
-                        .findFirst().orElse(null);
-                if (sc != null) {
-                    taxRate = sc.getUnitTax();
-                    scNetAmount = TaxUtils.calculateServiceChargeOrTipNettAmount(scTotalAmount, taxRate, sale.getCurrency().getDefaultFractionDigits());
-                }
-                //   scNetAmount = scTotalAmount.subtract(scTaxAmount);
-                // service charge without tax
+                BigDecimal scTotalAmount = serviceCharge.getItemTotal();
+                // service charge
                 pr.setServiceChargeLabel("Service charge");
-                pr.setServiceChargeAmount(nf.format(scNetAmount));
-                // service charge with tax
-                pr.setServiceChargeWithTaxLabel("Service charge with tax");
-                pr.setServiceChargeWithTaxAmount(nf.format(scTotalAmount));
+                pr.setServiceChargeAmount(nf.format(scTotalAmount));
+                if(serviceCharge.getUnitTax() != null && serviceCharge.getUnitTax().compareTo(BigDecimal.ZERO) > 0) {
+                    pr.setServiceChargeTax(String.format("%s %s %s", "Included", nf.format(serviceCharge.getUnitTax()), "Tax"));
+                } else {
+                    pr.setServiceChargeTax("No tax");
+                }
             }
 
             // discount
@@ -299,8 +289,7 @@ public class ReceiptFragment extends AbsFragment<WebView> {
                     BigDecimal invertedRate = BigDecimal.ONE.subtract(discountRate);
                     discountValue = invertedRate.multiply(BigDecimal.valueOf(100));
                 }
-                pr.setDiscountPercentageLabel(String.format("Discount %1$s", discountValue.setScale(0, RoundingMode.DOWN) + "%"));
-                pr.setPercentageDiscountLabel(String.format("%1$s Discount", discountValue.setScale(0, RoundingMode.DOWN) + "%"));
+                pr.setDiscountLabel(String.format("Discount %1$s", discountValue.setScale(0, RoundingMode.DOWN) + "%"));
                 pr.setDiscountAmount(nf.format(saleDiscount.negate()));
             }
 
@@ -309,16 +298,15 @@ public class ReceiptFragment extends AbsFragment<WebView> {
             if (tip != null) {
                 BigDecimal tipAmount = tip.getItemTotal();
                 // tip inclusive tax
-                String tipInclusive = "Tip inclusive %s  Tax";
-                SaleItem tipValue = Stream.of(sale.getItems())
-                        .filter(item -> SaleItemType.TIP.equals(item.getType()))
-                        .map(item -> item)
-                        .findFirst().orElse(null);
-                if (tipValue != null && tipValue.getUnitTax() != null) {
-                    tipInclusive = tipInclusive.replace("%s", tipValue.getUnitTax().toString() + "%");
+                if (tip.getUnitTax() != null) {
+                    String tipInclusive = "Tip inclusive %s  Tax";
+                    tipInclusive = tipInclusive.replace("%s", tip.getUnitTax().toString() + "%");
+                    pr.setTipInclusiveTaxAmount(tipInclusive);
+                } else {
+                    pr.setTipInclusiveTaxAmount("");
                 }
-                pr.setTipInclusiveTaxLabel(tipInclusive);
-                pr.setTipInclusiveTaxAmount(nf.format(tipAmount));
+                pr.setTipLabel("Tip");
+                pr.setTipTax(nf.format(tip.getUnitTax()));
             }
 
             // total amount
@@ -327,17 +315,23 @@ public class ReceiptFragment extends AbsFragment<WebView> {
 
             //details (list of payments details)
             pr.setDetailsTitle("Details");
-            List<PrintableDetail> details = new ArrayList<>();
-            details.add(new PrintableDetail("Payment type", sale.getPayments().get(0).getClass().getSimpleName()));
-            details.add(new PrintableDetail("Payment status", sale.getStatus().toString()));
+            List<PrintablePayment> payments = new ArrayList<>();
             for (Payment t : sale.getPayments()) {
+                List<PrintableDetail> details = new ArrayList<>();
+                details.add(new PrintableDetail("Payment type", t.getClass().getSimpleName()));
+                details.add(new PrintableDetail("Payment status", t.getStatus().name()));
+                details.add(new PrintableDetail("Payment amount", nf.format(t.getAmount())));
+                details.add(new PrintableDetail("Payment date", formatter.format(t.getInitialized())));
+
                 if (t instanceof CouponPurchasePayment) {
                     Timber.d("No special details for Coupon payment");
+                    payments.add(new PrintablePayment(details, ""));
                 }
-                if (t instanceof CashPurchasePayment) {
+                else if (t instanceof CashPurchasePayment) {
                     Timber.d("No special details for Cash payment");
+                    payments.add(new PrintablePayment(details, ""));
                 }
-                if (t instanceof CardPurchasePayment) {
+                else if (t instanceof CardPurchasePayment) {
                     CardPurchasePayment payment = (CardPurchasePayment) t;
                     List<DecodedData> tlv;
                     Map<String, String> decodedTags = new HashMap<>();
@@ -390,28 +384,22 @@ public class ReceiptFragment extends AbsFragment<WebView> {
                     details.add(new PrintableDetail("Mid", payment.getMid()));
                     details.add(new PrintableDetail("Approval code", payment.getAuthorizationCode()));
                     details.add(new PrintableDetail("TC", getTcValue(decodedTags, decodedUpdatedTags)));
-                }
-            }
-            pr.setDetails(details);
-
-            // footer
-            pr.setLine1("");
-            if (!CUSTOMER_RECEIPT) { // disabled printing of signature
-                pr.setSignatureLabel("Signature");
-                String signature = null;
-                for (Payment t : sale.getPayments()) {
-                    if (t instanceof CardPurchasePayment) {
-                        signature = ((CardPurchasePayment) t).getSignatureImage();
-                        break;
+                    if (!CUSTOMER_RECEIPT) { // disabled printing of signature
+                        pr.setSignatureLabel("Signature");
+                        payments.add(new PrintablePayment(details, payment.getSignatureImage()));
+                    } else {
+                        payments.add(new PrintablePayment(details, ""));
                     }
                 }
-                pr.setSignature(signature);
             }
-            pr.setLine2("");
-            pr.setLine3(String.format("%s %s", "Payment issued by", getContext().getString(R.string.app_name)));
+            pr.setPayments(payments);
+
+            // footer
+            pr.setRetainLabel("");
+            pr.setClosingLabel("");
+            pr.setIssuedByLabel(String.format("%s %s", "Payment issued by", getContext().getString(R.string.app_name)));
             pr.setBarcodeData(String.valueOf(sale.getMerchantReceiptId()));
             pr.setDisplayBarcodeLabel(true);
-            pr.setHasNext(false);
 
             printableReceipt = pr;
             return pr;
@@ -481,13 +469,21 @@ public class ReceiptFragment extends AbsFragment<WebView> {
                                 item.getUnitPriceModified() == null ? null :
                                         ReceiptUtils.bigDecimalToCurrencyString((item.getUnitPriceModified().subtract(item.getUnitPrice()).multiply(item.getQuantity())), currency, locale),
                                 item.getQuantity(),
-                                item.getUnitTax(),
-                                ReceiptUtils.bigDecimalToCurrencyString(item.getUnitPriceModified() == null ? item.getItemTotal() : (item.getUnitPrice().multiply(item.getQuantity())), currency, locale)
+                                item.getUnitTax().toString() + "%",
+                                ReceiptUtils.bigDecimalToCurrencyString(item.getUnitPriceModified() == null ? item.getItemTotal() : (item.getUnitPrice().multiply(item.getQuantity())), currency, locale),
+                                getDiscountPercentage(item.getUnitPrice(), item.getUnitPriceModified())
                         ))
                         .collect(Collectors.toList())
         );
 
         return printable;
+    }
+
+    private static String getDiscountPercentage(BigDecimal unitPrice, BigDecimal unitPriceModified){
+        if (unitPriceModified == null)
+            return "";
+
+        return unitPrice.subtract(unitPriceModified).multiply(new BigDecimal(100)).divide(unitPrice, RoundingMode.UP).toString();
     }
 
     private static List<TaxItem> getPrintableTaxItems(List<SaleItem> saleItems, boolean unitPricesIncludeTax, Currency currency, Locale locale, String sumLabel) {
@@ -520,6 +516,6 @@ public class ReceiptFragment extends AbsFragment<WebView> {
     }
 
     private Single<String> prepareImageReceipt(PrintableReceipt receipt) {
-        return Single.fromCallable(() -> ReceiptUtil.buildHtmlPrintableReceipt(CUSTOMER_RECEIPT, receipt));
+        return Single.fromCallable(() -> ReceiptUtil.buildHtmlPrintableReceipt(getContext(),CUSTOMER_RECEIPT, receipt));
     }
 }
