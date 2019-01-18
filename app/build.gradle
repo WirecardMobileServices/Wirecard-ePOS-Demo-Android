@@ -32,11 +32,21 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            Properties userProperties = new Properties()
+            try {
+                userProperties.load(new FileInputStream(file("../user.properties")))
+            } catch (IOException e) {
+                System.err.&println("Error while loading user.properties")
+            }
+            buildConfigField "String", "username", userProperties.getProperty("username", "\"\"")
+            buildConfigField "String", "password", userProperties.getProperty("password", "\"\"")
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+            buildConfigField "String", "username", "\"\""
+            buildConfigField "String", "password", "\"\""
         }
     }
 }

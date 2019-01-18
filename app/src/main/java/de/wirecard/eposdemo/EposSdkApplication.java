@@ -1,6 +1,7 @@
 package de.wirecard.eposdemo;
 
 import android.support.multidex.MultiDexApplication;
+import android.text.TextUtils;
 
 import java.util.Currency;
 
@@ -16,8 +17,8 @@ public class EposSdkApplication extends MultiDexApplication {
 
     private static EposSDK eposSDK;
 
-    private final static String USERNAME = "EposDemoUser";
-    private final static String PASSWORD = "Demo12345678!!!!!";
+    private final static String USERNAME = BuildConfig.username;
+    private final static String PASSWORD = BuildConfig.password;
 
     public static final Currency CURRENCY = Currency.getInstance("EUR");
     public static final int FRACTION_DIGITS = CURRENCY.getDefaultFractionDigits();
@@ -25,11 +26,22 @@ public class EposSdkApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        eposSDK = new EposSdkBuilder(this, Env.SWITCH_TEST)
-                .setCredentials(new UserCredentials(USERNAME, PASSWORD))
-                .addExtension(Spm2SpireTerminalExtension.getInstance())
-                .addExtension(DatecsPrinterExtension.getInstance())
-                .build();
+
+        if (TextUtils.isEmpty(USERNAME) || TextUtils.isEmpty(PASSWORD)) {
+            throw new IllegalStateException("" +
+                    "You have to specify username & password in 'user.properties' file! \n" +
+                    "Credentials should be provided by Wirecard Epos support. \n" +
+                    "Example of 'user.properties' file: \n" +
+                    "username = \"yourUsername\"\n" +
+                    "password = \"yourPassword\"");
+        }
+        else {
+            eposSDK = new EposSdkBuilder(this, Env.SWITCH_TEST)
+                    .setCredentials(new UserCredentials(USERNAME, PASSWORD))
+                    .addExtension(Spm2SpireTerminalExtension.getInstance())
+                    .addExtension(DatecsPrinterExtension.getInstance())
+                    .build();
+        }
 
         Timber.plant(new Timber.DebugTree());
     }
