@@ -68,7 +68,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
 
-    def eposVersion = "2.9.0"
+    def eposVersion = "2.9.1"
 
     //Wirecard ePOS SDK
     implementation "de.wirecard.epos:EposSDK:$eposVersion"
