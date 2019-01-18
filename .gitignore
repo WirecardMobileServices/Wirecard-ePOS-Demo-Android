@@ -33,3 +33,4 @@ build/
 
 #.idea/workspace.xml - remove # and delete .idea if item better suit your needs.
 .gradle
+user.properties
