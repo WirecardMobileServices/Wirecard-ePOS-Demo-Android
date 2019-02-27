@@ -36,7 +36,8 @@ android {
             try {
                 userProperties.load(new FileInputStream(file("../user.properties")))
             } catch (IOException e) {
-                System.err.&println("Error while loading user.properties")
+                System.err.println("Error while loading user.properties")
+                e.printStackTrace()
             }
             buildConfigField "String", "username", userProperties.getProperty("username", "\"\"")
             buildConfigField "String", "password", userProperties.getProperty("password", "\"\"")
@@ -68,7 +69,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
 
-    def eposVersion = "2.9.2"
+    def eposVersion = "2.9.3"
 
     //Wirecard ePOS SDK
     implementation "de.wirecard.epos:EposSDK:$eposVersion"
