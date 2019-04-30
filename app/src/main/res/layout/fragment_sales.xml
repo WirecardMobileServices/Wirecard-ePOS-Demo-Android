@@ -51,6 +51,14 @@
             style="@style/ActionButton"
             android:text="@string/refund"
             />
+
+        <Button
+            android:id="@+id/reference_purchase"
+            style="@style/ActionButton"
+            android:text="@string/reference_purchase"
+            android:ellipsize="end"
+            android:lines="1"
+            />
     </LinearLayout>
 
 

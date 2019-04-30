@@ -27,4 +27,6 @@
     <string name="settings_note">Click for select, long click for remove</string>
     <string name="cash_register_error">You have to select cash register in settings</string>
     <string name="cancel">Cancel</string>
+    <string name="make_unconfirmed_sale">Make unconfirmed (open) sale</string>
+    <string name="reference_purchase">Reference purchase</string>
 </resources>

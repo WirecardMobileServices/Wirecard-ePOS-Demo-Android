@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "de.wirecard.eposdemo"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -53,12 +53,14 @@ android {
 }
 
 dependencies {
+    def supportVersion = "28.0.0"
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.android.support:design:27.1.1'
-    implementation 'com.android.support:recyclerview-v7:27.1.1'
-    implementation 'com.android.support:cardview-v7:27.1.1'
+    implementation 'com.android.support:appcompat-v7:' + supportVersion
+    implementation 'com.android.support:support-v4:' + supportVersion
+    implementation 'com.android.support:design:' + supportVersion
+    implementation 'com.android.support:recyclerview-v7:' + supportVersion
+    implementation 'com.android.support:cardview-v7:' + supportVersion
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     implementation 'com.makeramen:roundedimageview:2.3.0'
     implementation('com.squareup.picasso:picasso:2.71828') {
@@ -69,7 +71,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
 
-    def eposVersion = "2.9.3"
+    def eposVersion = "2.10.0"
 
     //Wirecard ePOS SDK
     implementation "de.wirecard.epos:EposSDK:$eposVersion"

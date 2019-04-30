@@ -15,27 +15,27 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 
-import de.wirecard.epos.model.sale.request.payment.cash.CashReturnPayment;
+import de.wirecard.epos.model.sale.builder.ReferencePurchaseRequest;
+import de.wirecard.epos.model.sale.builder.ReturnRequest;
+import de.wirecard.epos.model.sale.builder.payment.ARefundPayment;
+import de.wirecard.epos.model.sale.builder.payment.CardReferenceRefundPayment;
+import de.wirecard.epos.model.sale.builder.payment.CashPurchasePayment;
+import de.wirecard.epos.model.sale.builder.payment.CashRefundPayment;
 import de.wirecard.epos.model.sale.sales.Sale;
-import de.wirecard.epos.model.sale.sales.SaleItem;
-import de.wirecard.epos.model.sale.sales.SaleItemType;
+import de.wirecard.epos.model.sale.sales.payment.AlipayPayment;
+import de.wirecard.epos.model.sale.sales.payment.CardPayment;
+import de.wirecard.epos.model.sale.sales.payment.CashPayment;
 import de.wirecard.epos.model.sale.sales.payment.Payment;
-import de.wirecard.epos.model.sale.sales.payment.alipay.AlipayPayment;
-import de.wirecard.epos.model.sale.sales.payment.card.CardPayment;
-import de.wirecard.epos.model.sale.sales.payment.cash.CashPayment;
-import de.wirecard.epos.model.sale.sales.payment.wechat.WechatPayment;
+import de.wirecard.epos.model.sale.sales.payment.WechatPayment;
 import de.wirecard.epos.model.with.With;
 import de.wirecard.epos.model.with.WithPagination;
-import de.wirecard.epos.util.TaxUtils;
 import de.wirecard.eposdemo.adapter.SimpleItem;
 import de.wirecard.eposdemo.adapter.SimpleItemRecyclerViewAdapter;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 import static de.wirecard.eposdemo.EposSdkApplication.CURRENCY;
-import static de.wirecard.eposdemo.EposSdkApplication.FRACTION_DIGITS;
 
 public class SalesFragment extends AbsFragment<RecyclerView> {
 
@@ -43,6 +43,7 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
 
     private Button receipt;
     private Button refund;
+    private Button referencePurchase;
 
     public SalesFragment() {
 
@@ -78,6 +79,11 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
             doRefund();
         });
 
+        referencePurchase = view.findViewById(R.id.reference_purchase);
+        referencePurchase.setOnClickListener(v -> {
+            doReferencePurchase();
+        });
+
         loadSales();
     }
 
@@ -97,7 +103,7 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
                             saleLights = items;
                             final List<SimpleItem> simpleItems = Stream.of(items)
                                     .map(item -> new SimpleItem(
-                                                    getCardholderNameOrType(item),
+                                            String.format("%s %s", getCardholderNameOrType(item), item.getType().name()),
                                                     item.getStatus().toString(),
                                                     nf.format(item.getTotalAmount()),
                                                     item.getInitialized().format(formatter)
@@ -122,36 +128,61 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
 
     }
 
-    private void doRefund() {
-        showLoading();
+    private void doReferencePurchase() {
         final int selectedPosition = ((SimpleItemRecyclerViewAdapter) content.getAdapter()).getSelectedPosition();
         if (selectedPosition > RecyclerView.NO_POSITION) {
+            showLoading();
             final Sale sale = saleLights.get(selectedPosition);
-            final List<SaleItem> returnItems = Collections.singletonList(new SaleItem(
-                    SaleItemType.PURCHASE,
-                    "Demo Item",
-                    sale.getTotalAmount(),
-                    null,
-                    BigDecimal.ONE,
-                    TaxUtils.calculateTaxAmount(sale.getTotalAmount(), new BigDecimal(19), true, FRACTION_DIGITS),
-                    sale.getTotalAmount(),
-                    null,
-                    null,
-                    null,
-                    null
-            ));
+            BigDecimal outstandingAmount = sale.getOutstandingAmount();
+            CashPurchasePayment cashPurchasePayment = new CashPurchasePayment(outstandingAmount);
+            ReferencePurchaseRequest referencePurchaseRequest = new ReferencePurchaseRequest(sale.getId(), cashPurchasePayment, "demo reference purchase note");
             addDisposable(
                     EposSdkApplication.getEposSdk()
                             .sales()
-                            .saleReturn(
-                                    new CashReturnPayment(sale.getTotalAmount(), null),
-                                    sale.getOriginalSaleId() != null ? sale.getOriginalSaleId() : sale.getId(),
-                                    CURRENCY,
-                                    returnItems,
-                                    true,
-                                    Settings.getCashRegisterId(getContext()),
-                                    "saleNote",
-                                    Settings.getShopID(getActivity())
+                            .operation()
+                            .referencePurchase(referencePurchaseRequest)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(sale1 -> {
+                                Toast.makeText(getContext(), "Sale completed", Toast.LENGTH_SHORT).show();
+                                loadSales();
+                            }, showErrorInsteadContent())
+            );
+        }
+        else
+            Toast.makeText(getContext(), "You have to select something", Toast.LENGTH_SHORT).show();
+    }
+
+    private void doRefund() {
+        final int selectedPosition = ((SimpleItemRecyclerViewAdapter) content.getAdapter()).getSelectedPosition();
+        if (selectedPosition > RecyclerView.NO_POSITION) {
+            showLoading();
+            final Sale sale = saleLights.get(selectedPosition);
+
+            ARefundPayment refundPayment;
+            if (sale.getPayments() != null && sale.getPayments().get(0) instanceof CardPayment)
+                refundPayment = new CardReferenceRefundPayment(sale.getTotalAmount(), sale.getId());
+            else
+                refundPayment = new CashRefundPayment(sale.getTotalAmount());
+
+            addDisposable(
+                    EposSdkApplication.getEposSdk()
+                            .sales()
+                            .operation()
+                            .returnn(
+                                    new ReturnRequest(
+                                            sale.getOriginalSaleId() != null ? sale.getOriginalSaleId() : sale.getId(),
+                                            refundPayment,
+                                            sale.getTotalAmount(),
+                                            CURRENCY.getCurrencyCode(),
+                                            null,
+                                            "saleNote",
+                                            true,
+                                            Settings.getShopID(getActivity()),
+                                            null,
+                                            Settings.getCashRegisterId(getContext()),
+                                            sale.getItems(),
+                                            true
+                                    )
                             )
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(sale1 -> {
@@ -169,6 +200,7 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
         super.showLoading();
         receipt.setEnabled(false);
         refund.setEnabled(false);
+        referencePurchase.setEnabled(false);
     }
 
     @Override
@@ -176,5 +208,6 @@ public class SalesFragment extends AbsFragment<RecyclerView> {
         super.loadingFinished();
         receipt.setEnabled(true);
         refund.setEnabled(true);
+        referencePurchase.setEnabled(true);
     }
 }

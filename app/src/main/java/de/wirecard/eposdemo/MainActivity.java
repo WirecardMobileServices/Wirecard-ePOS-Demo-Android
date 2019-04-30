@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .subscribe(
                                 user -> {
                                     username.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
-                                    if (!user.getMerchantShops().isEmpty())
+                                    if (user.getMerchantShops() != null && !user.getMerchantShops().isEmpty())
                                         Settings.setShopId(this, user.getMerchantShops().get(0).getId());
                                     Settings.setLoggedUser(user);
                                 },
