@@ -1,12 +1,17 @@
 package de.wirecard.eposdemo;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,10 +21,14 @@ import com.jakewharton.rxrelay2.Relay;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import de.wirecard.epos.EposSDK;
-import de.wirecard.epos.model.sale.builder.SaleBuilder;
+import de.wirecard.epos.model.sale.builder.PurchaseRequest;
+import de.wirecard.epos.model.sale.builder.payment.CardPurchasePayment;
+import de.wirecard.epos.model.sale.builder.payment.CashPurchasePayment;
+import de.wirecard.epos.model.sale.builder.payment.PurchasePayment;
 import de.wirecard.epos.model.sale.sales.SaleItem;
 import de.wirecard.epos.model.sale.sales.SaleItemType;
 import de.wirecard.epos.util.TaxUtils;
@@ -36,6 +45,7 @@ public class PaymentFragment extends AbsFragment<View> {
 
     private TextView amountTextView, update;
     private Button cashButton, cardButton;
+    private CheckBox openSaleCheckbox;
 
     private final NumberFormat nf;
 
@@ -56,6 +66,12 @@ public class PaymentFragment extends AbsFragment<View> {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        amountTextView = view.findViewById(R.id.amount);
+        update = view.findViewById(R.id.update);
+        cashButton = view.findViewById(R.id.cash);
+        cardButton = view.findViewById(R.id.card);
+        openSaleCheckbox = view.findViewById(R.id.openSaleCheckbox);
+
         view.findViewById(R.id.calculator_1).setOnClickListener(new CalcListener(1));
         view.findViewById(R.id.calculator_2).setOnClickListener(new CalcListener(2));
         view.findViewById(R.id.calculator_3).setOnClickListener(new CalcListener(3));
@@ -75,13 +91,8 @@ public class PaymentFragment extends AbsFragment<View> {
             return true;
         });
 
-        amountTextView = view.findViewById(R.id.amount);
-        update = view.findViewById(R.id.update);
 
         refreshAmount();
-
-        cashButton = view.findViewById(R.id.cash);
-        cardButton = view.findViewById(R.id.card);
 
         Relay<Event> eventRelay = BehaviorRelay.create();
 
@@ -124,6 +135,13 @@ public class PaymentFragment extends AbsFragment<View> {
 
         cashButton.setOnClickListener(v -> doPayment(true, eventRelay));
         cardButton.setOnClickListener(v -> doPayment(false, eventRelay));
+        openSaleCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> refreshAmount());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        openSaleCheckbox.setVisibility(View.VISIBLE);
     }
 
     private void doPayment(boolean isCash, Relay<Event> eventRelay) {
@@ -132,42 +150,62 @@ public class PaymentFragment extends AbsFragment<View> {
 
         update.setVisibility(View.VISIBLE);
 
-        final SaleBuilder.PaymentMethodStep paymentMethodStep = SaleBuilder.newBuilder()
-                .setAmount(amountValue)
-                .setCurrency(CURRENCY)
-                .unitPricesIncludeTax();
-        final SaleBuilder.OptionalStep optionalStep;
-        if (isCash)
-            optionalStep = paymentMethodStep.addCashPayment(amountValue);
-        else
-            optionalStep = paymentMethodStep.addCardPayment(amountValue);
-
-        if (Settings.isCashRegisterRequired())
-            if (Settings.getCashRegisterId(getContext()) == null) {
+        String cashRegisterId = Settings.getCashRegisterId(getContext());
+        if (Settings.isCashRegisterRequired()) {
+            if (cashRegisterId == null) {
                 Toast.makeText(getContext(), R.string.cash_register_error, Toast.LENGTH_LONG).show();
                 loadingFinished();
                 return;
-            }else
-                optionalStep.setCashRegisterId(Settings.getCashRegisterId(getContext()));
+            }
+        }
 
-        final SaleBuilder saleBuilder = optionalStep.setSaleItems(Collections.singletonList(new SaleItem(
+        BigDecimal saleAmount = null;
+        if (openSaleCheckbox.isChecked())
+            saleAmount = amountValue.add(new BigDecimal("10"));
+        else
+            saleAmount = amountValue;
+
+        List<SaleItem> saleItem = Collections.singletonList(new SaleItem(
                 SaleItemType.PURCHASE,
                 "Demo Item",
-                amountValue,
+                saleAmount,
                 null,
                 BigDecimal.ONE,
-                TaxUtils.calculateTaxAmount(amountValue, new BigDecimal(19), true, FRACTION_DIGITS),
-                amountValue,
+                TaxUtils.calculateTaxAmount(saleAmount, new BigDecimal(19), true, FRACTION_DIGITS),
+                saleAmount,
                 null,
                 null,
                 null,
                 null
-        )))
-                .build();
+        ));
 
+
+        PurchasePayment payment = null;
+        if (isCash)
+            payment = new CashPurchasePayment(amountValue);
+        else
+            payment = new CardPurchasePayment(amountValue);
+
+        PurchaseRequest purchaseRequest = new PurchaseRequest(
+                saleAmount,
+                CURRENCY.getCurrencyCode(),
+                "demo purchase note",
+                null,
+                null,
+                null,
+                null,
+                cashRegisterId,
+                payment,
+                saleItem,
+                true,
+                null
+        );
+
+        openSaleCheckbox.setVisibility(View.GONE);
         addDisposable(
                 eposSdk.sales()
-                        .pay(saleBuilder)
+                        .operation()
+                        .purchase(purchaseRequest)
                         .subscribeParallel(eventRelay)
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnEvent((sale, throwable) -> loadingFinished())
@@ -232,7 +270,15 @@ public class PaymentFragment extends AbsFragment<View> {
     private void refreshAmount() {
         if (error != null && error.getVisibility() == View.VISIBLE)
             error.setVisibility(View.GONE);
-        amountTextView.setText(nf.format(amountValue));
+        if (openSaleCheckbox.isChecked()) {
+            String amount = nf.format(amountValue);
+            String amountPlusTen = String.format("%s + %s", amount, nf.format(new BigDecimal("10")));
+            Spannable wordToSpan = new SpannableString(amountPlusTen);
+            wordToSpan.setSpan(new ForegroundColorSpan(Color.GRAY), amount.length(), amountPlusTen.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            amountTextView.setText(wordToSpan);
+        }
+        else
+            amountTextView.setText(nf.format(amountValue));
     }
 
     public void addDigit(int digit) {
