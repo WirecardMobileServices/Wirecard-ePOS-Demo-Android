@@ -28,8 +28,8 @@ import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftOpen;
 import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftStatus;
 import de.wirecard.epos.model.with.With;
 import de.wirecard.epos.model.with.WithPagination;
-import de.wirecard.eposdemo.adapter.SimpleItem;
-import de.wirecard.eposdemo.adapter.SimpleItemRecyclerViewAdapter;
+import de.wirecard.eposdemo.adapter.simple.SimpleItem;
+import de.wirecard.eposdemo.adapter.simple.SimpleItemRecyclerViewAdapter;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 import static de.wirecard.eposdemo.EposSdkApplication.CURRENCY;

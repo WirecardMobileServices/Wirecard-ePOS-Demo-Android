@@ -28,7 +28,7 @@ import de.wirecard.epos.InventoryManager;
 import de.wirecard.epos.model.inventory.ProductImage;
 import de.wirecard.epos.model.with.With;
 import de.wirecard.epos.model.with.WithPagination;
-import de.wirecard.eposdemo.adapter.SimpleItem;
+import de.wirecard.eposdemo.adapter.simple.SimpleItem;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 

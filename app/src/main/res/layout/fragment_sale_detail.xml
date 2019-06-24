@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <TextView
+        android:id="@+id/detailTitle"
+        style="@style/DetailTitle"
+        android:text="@string/sale_detail"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <Space
+        android:id="@+id/space"
+        android:layout_width="wrap_content"
+        android:layout_height="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/detailTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <ProgressBar
+        android:id="@+id/loading"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:indeterminate="true"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/space"
+        tools:visibility="visible"
+        />
+
+    <TextView
+        android:id="@+id/error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#F00"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Error"
+        tools:visibility="visible"
+        />
+
+
+    <TextView
+        android:id="@+id/paymentType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:textSize="@dimen/action_button_font_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailTitle"
+        tools:text="sale type"
+        />
+
+    <TextView
+        android:id="@+id/saleStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:textSize="@dimen/action_button_font_size"
+        app:layout_constraintBaseline_toBaselineOf="@+id/paymentType"
+        app:layout_constraintEnd_toStartOf="@+id/paymentAmount"
+        app:layout_constraintStart_toEndOf="@+id/paymentType"
+        tools:text="sale status"
+        />
+
+    <TextView
+        android:id="@+id/paymentAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:gravity="center_vertical|end"
+        android:lines="1"
+        android:textSize="@dimen/action_button_font_size"
+        app:layout_constraintBaseline_toBaselineOf="@+id/paymentType"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="sale amount"
+        />
+
+    <TextView
+        android:id="@+id/paymentDateTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:textSize="@dimen/small_font_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentType"
+        tools:text="sale datetime"
+        />
+
+    <TextView
+        android:id="@+id/paymentActionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:text="Sale actions:"
+        android:textSize="@dimen/action_button_font_size"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/paymentActionButtons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/paymentActionButtons"
+        tools:visibility="visible"
+        />
+
+    <LinearLayout
+        android:id="@+id/paymentActionButtons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/paymentActionLabel"
+        app:layout_constraintTop_toBottomOf="@+id/paymentDateTime"
+        tools:layout_height="48dp"
+        tools:visibility="visible"
+        />
+
+    <TextView
+        android:id="@+id/paymentsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:text="Payments:"
+        android:textSize="@dimen/action_button_font_size"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentActionButtons"
+        tools:visibility="visible"
+        />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/paymentsRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/error"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentsLabel"
+        tools:listitem="@layout/sale_payment_row"
+        />
+
+    <android.support.constraint.Group
+        android:id="@+id/saleActionsGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="paymentActionLabel,paymentActionButtons"
+        />
+
+    <android.support.constraint.Group
+        android:id="@+id/paymentsGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="paymentsLabel,paymentsRecyclerView"
+        />
+</android.support.constraint.ConstraintLayout>

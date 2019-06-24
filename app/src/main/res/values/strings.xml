@@ -7,12 +7,16 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="payment">Payment</string>
     <string name="sales">Sales</string>
+    <string name="sale_detail">Sale detail</string>
+    <string name="modify_sale">Modify sale</string>
     <string name="shifts">Shifts</string>
     <string name="products">Products</string>
     <string name="settings">Settings</string>
     <string name="not_found">Not found</string>
     <string name="cash">Cash</string>
+    <string name="next">Next</string>
     <string name="card">Card</string>
+    <string name="terminal_authorization">Terminal authorization</string>
     <string name="receipt">Receipt</string>
     <string name="refund">Refund</string>
     <string name="open">Open</string>
@@ -29,4 +33,6 @@
     <string name="cancel">Cancel</string>
     <string name="make_unconfirmed_sale">Make unconfirmed (open) sale</string>
     <string name="reference_purchase">Reference purchase</string>
+    <string name="unsupported_payment_combination">Unsupported payment method and type combination</string>
+    <string name="payment_actions">Payment actions:</string>
 </resources>

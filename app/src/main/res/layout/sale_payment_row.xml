@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    >
+
+    <TextView
+        android:id="@+id/paymentType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:textSize="@dimen/action_button_font_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="payment type"
+        />
+
+    <TextView
+        android:id="@+id/paymentStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:textSize="@dimen/action_button_font_size"
+        app:layout_constraintBaseline_toBaselineOf="@+id/paymentType"
+        app:layout_constraintEnd_toStartOf="@+id/paymentAmount"
+        app:layout_constraintStart_toEndOf="@+id/paymentType"
+        tools:text="payment status"
+        />
+
+    <TextView
+        android:id="@+id/paymentAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:gravity="center_vertical|end"
+        android:lines="1"
+        android:textSize="@dimen/action_button_font_size"
+        app:layout_constraintBaseline_toBaselineOf="@+id/paymentType"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="payment amount"
+        />
+
+    <TextView
+        android:id="@+id/paymentDateTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:textSize="@dimen/small_font_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentType"
+        tools:text="payment datetime"
+        />
+
+    <TextView
+        android:id="@+id/paymentActionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:text="@string/payment_actions"
+        android:textSize="@dimen/action_button_font_size"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/paymentActionButtons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/paymentActionButtons"
+        tools:visibility="visible"
+        />
+
+    <LinearLayout
+        android:id="@+id/paymentActionButtons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/paymentActionLabel"
+        app:layout_constraintTop_toBottomOf="@+id/paymentDateTime"
+        tools:visibility="visible"
+        />
+
+
+    <android.support.constraint.Group
+        android:id="@+id/paymentActionsGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="paymentActionLabel,paymentActionButtons"
+        />
+
+</android.support.constraint.ConstraintLayout>

@@ -1,4 +1,4 @@
-package de.wirecard.eposdemo.adapter;
+package de.wirecard.eposdemo.adapter.simple;
 
 import android.support.annotation.Nullable;
 

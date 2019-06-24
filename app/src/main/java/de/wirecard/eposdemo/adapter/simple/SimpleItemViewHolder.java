@@ -1,4 +1,4 @@
-package de.wirecard.eposdemo.adapter;
+package de.wirecard.eposdemo.adapter.simple;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -17,8 +17,8 @@ public class SimpleItemViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
         text1 = itemView.findViewById(R.id.text1);
         text2 = itemView.findViewById(R.id.text2);
-        text3 = itemView.findViewById(R.id.text3);
-        text4 = itemView.findViewById(R.id.text4);
+        text3 = itemView.findViewById(R.id.paymentAmount);
+        text4 = itemView.findViewById(R.id.paymentDateTime);
     }
 
     public TextView getText1() {
