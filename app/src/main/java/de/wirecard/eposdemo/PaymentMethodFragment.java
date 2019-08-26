@@ -34,6 +34,7 @@ import de.wirecard.epos.model.sale.builder.payment.APurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.CardPurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.CardTerminalAuthorizationPayment;
 import de.wirecard.epos.model.sale.builder.payment.CashPurchasePayment;
+import de.wirecard.epos.model.sale.builder.payment.EftCardPurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.PurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.TerminalAuthorizationPayment;
 import de.wirecard.epos.model.sale.sales.SaleItem;
@@ -104,7 +105,7 @@ public class PaymentMethodFragment extends AbsFragment<View> implements OnPaymen
     private void initViews() {
         openSaleCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> refreshAmount());
 
-        List<AppPayment> supportedPaymentMethods = Arrays.asList(AppPayment.CASH, AppPayment.CARD, AppPayment.TERMINAL_AUTHORIZATION);
+        List<AppPayment> supportedPaymentMethods = Arrays.asList(AppPayment.CASH, AppPayment.CARD, AppPayment.TERMINAL_AUTHORIZATION, AppPayment.EFT_CARD);
         PaymentMethodAdapter paymentMethodAdapter = new PaymentMethodAdapter(supportedPaymentMethods, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(paymentMethodAdapter);
@@ -274,6 +275,8 @@ public class PaymentMethodFragment extends AbsFragment<View> implements OnPaymen
             payment = new CashPurchasePayment(amountValue);
         else if (appPayment == AppPayment.TERMINAL_AUTHORIZATION)
             payment = new CardTerminalAuthorizationPayment(amountValue);
+        else if (appPayment == AppPayment.EFT_CARD)
+            payment = new EftCardPurchasePayment(amountValue);
 
         return payment;
     }
