@@ -1,5 +1,6 @@
 package de.wirecard.eposdemo;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -32,6 +33,15 @@ import io.reactivex.disposables.CompositeDisposable;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static final String AMOUNT = "AMOUNT";
+    public static final String SALE = "SALE";
+    public static final String SALE_MODIFY_MODE = "SALE_MODIFY_MODE";
+
+    public static final int GREEN = Color.parseColor("#009933");
+    public static final int RED = Color.parseColor("#FF0000");
+    public static final int BLUE = Color.parseColor("#0000FF");
+    public static final int YELLOW = Color.parseColor("#FF7F0E");
 
     private int selectedMenu = -1;
 
@@ -175,6 +185,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fragment = new NotFoundFragment();
         }
 
+        changeScreen(fragment, fragment.getClass().getSimpleName());
+    }
+
+    public void changeScreenWithBack(Fragment fragment, String tag) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack(tag)
+                .replace(R.id.contentFrameLayout, fragment)
+                .commit();
+    }
+
+    public void changeScreen(Fragment fragment, String tag) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.contentFrameLayout, fragment)

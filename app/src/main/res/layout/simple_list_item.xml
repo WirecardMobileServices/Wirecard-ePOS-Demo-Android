@@ -35,13 +35,13 @@
         android:lines="1"
         android:textSize="@dimen/action_button_font_size"
         app:layout_constraintBaseline_toBaselineOf="@+id/text1"
-        app:layout_constraintEnd_toStartOf="@+id/text3"
+        app:layout_constraintEnd_toStartOf="@+id/paymentAmount"
         app:layout_constraintStart_toEndOf="@+id/text1"
         tools:text="Text #2"
         />
 
     <TextView
-        android:id="@+id/text3"
+        android:id="@+id/paymentAmount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -55,7 +55,7 @@
         />
 
     <TextView
-        android:id="@+id/text4"
+        android:id="@+id/paymentDateTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"

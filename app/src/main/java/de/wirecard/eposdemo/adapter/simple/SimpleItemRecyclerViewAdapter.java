@@ -1,4 +1,4 @@
-package de.wirecard.eposdemo.adapter;
+package de.wirecard.eposdemo.adapter.simple;
 
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import de.wirecard.eposdemo.MainActivity;
 import de.wirecard.eposdemo.R;
 
 public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemViewHolder> {
@@ -19,10 +20,6 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
     private List<SimpleItem> values;
     @Nullable
     private OnItemClickListener onItemClickListener;
-
-    private static final int GREEN = Color.parseColor("#009933");
-    private static final int RED = Color.parseColor("#FF0000");
-    private static final int BLUE = Color.parseColor("#0000FF");
 
     private boolean selectable;
     private int selectedPosition = RecyclerView.NO_POSITION;
@@ -58,12 +55,14 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
         changeVisibilityAndSetText(holder.getText3(), item.getText3());
         changeVisibilityAndSetText(holder.getText4(), item.getText4());
 
-        if ("COMPLETED".equals(item.getText2()) || "OPEN".equals(item.getText2()))
-            holder.getText2().setTextColor(GREEN);
+        if ("COMPLETED".equals(item.getText2()))
+            holder.getText2().setTextColor(MainActivity.GREEN);
         if ("FAILED".equals(item.getText2()))
-            holder.getText2().setTextColor(RED);
+            holder.getText2().setTextColor(MainActivity.RED);
         if ("RETURNED".equals(item.getText2()))
-            holder.getText2().setTextColor(BLUE);
+            holder.getText2().setTextColor(MainActivity.BLUE);
+        if ("UNCONFIRMED".equals(item.getText2()))
+            holder.getText2().setTextColor(MainActivity.YELLOW);
 
         holder.itemView.setSelected(selectedPosition == position);
         if (selectable) {
