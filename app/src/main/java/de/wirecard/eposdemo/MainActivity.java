@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public static final String AMOUNT = "AMOUNT";
     public static final String SALE = "SALE";
+    public static final String SALE_MODIFY_MODE = "SALE_MODIFY_MODE";
 
     public static final int GREEN = Color.parseColor("#009933");
     public static final int RED = Color.parseColor("#FF0000");

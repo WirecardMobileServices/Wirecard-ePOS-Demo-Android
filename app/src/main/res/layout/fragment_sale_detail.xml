@@ -6,22 +6,19 @@
     android:layout_height="match_parent"
     >
 
-    <TextView
-        android:id="@+id/detailTitle"
-        style="@style/DetailTitle"
-        android:text="@string/sale_detail"
+    <LinearLayout
+        android:id="@+id/paymentActionButtons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
-    <Space
-        android:id="@+id/space"
-        android:layout_width="wrap_content"
-        android:layout_height="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/detailTitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/paymentActionLabel"
+        app:layout_constraintTop_toBottomOf="@+id/paymentDateTime"
+        tools:layout_height="48dp"
+        tools:visibility="visible"
         />
 
     <ProgressBar
@@ -37,6 +34,25 @@
         tools:visibility="visible"
         />
 
+    <Space
+        android:id="@+id/space"
+        android:layout_width="wrap_content"
+        android:layout_height="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/detailTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/detailTitle"
+        style="@style/DetailTitle"
+        android:text="@string/sale_detail"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+
     <TextView
         android:id="@+id/error"
         android:layout_width="wrap_content"
@@ -49,7 +65,6 @@
         tools:text="Error"
         tools:visibility="visible"
         />
-
 
     <TextView
         android:id="@+id/paymentType"
@@ -126,21 +141,6 @@
         tools:visibility="visible"
         />
 
-    <LinearLayout
-        android:id="@+id/paymentActionButtons"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/paymentActionLabel"
-        app:layout_constraintTop_toBottomOf="@+id/paymentDateTime"
-        tools:layout_height="48dp"
-        tools:visibility="visible"
-        />
-
     <TextView
         android:id="@+id/paymentsLabel"
         android:layout_width="wrap_content"
@@ -156,19 +156,6 @@
         tools:visibility="visible"
         />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/paymentsRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/error"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/paymentsLabel"
-        tools:listitem="@layout/sale_payment_row"
-        />
-
     <android.support.constraint.Group
         android:id="@+id/saleActionsGroup"
         android:layout_width="wrap_content"
@@ -181,5 +168,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="paymentsLabel,paymentsRecyclerView"
+        />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/paymentsRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/error"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentsLabel"
+        tools:listitem="@layout/sale_payment_row"
         />
 </android.support.constraint.ConstraintLayout>
