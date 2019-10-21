@@ -71,7 +71,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
 
-    def eposVersion = "2.13.0"
+    def eposVersion = "2.14.0"
 
     //Wirecard ePOS SDK
     implementation "de.wirecard.epos:EposSDK:$eposVersion"
@@ -83,7 +83,7 @@ dependencies {
     implementation "de.wirecard.epos:EposExtensionSpireSpm2:$eposVersion"
 
     //Wirecard ePOS SDK extension for Pax A920 terminal
-    implementation "de.wirecard.epos:EposExtensionPaxA920:$eposVersion"
+    implementation "de.wirecard.epos:EposExtensionPaydroid:$eposVersion"
 
     //multidex
     implementation 'com.android.support:multidex:1.0.3'

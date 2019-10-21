@@ -72,7 +72,7 @@ public class ModifySaleFragment extends AbsFragment<View> {
                         null
                 ));
 
-                ModifyPurchaseRequest modifyPurchaseRequest = new ModifyPurchaseRequest(sale.getId(), sale.getVersion(), saleNote.getText().toString(), modifiedAmount, saleItem,
+                ModifyPurchaseRequest modifyPurchaseRequest = new ModifyPurchaseRequest(sale.getId(), sale.getVersion(), saleNote.getText().toString(), null, modifiedAmount, saleItem,
                         sale.getUnitPricesIncludeTax());
 
                 addDisposable(EposSdkApplication.getEposSdk()

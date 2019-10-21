@@ -8,7 +8,7 @@ import java.util.Currency;
 import de.wirecard.epos.EposSDK;
 import de.wirecard.epos.EposSdkBuilder;
 import de.wirecard.epos.extension.datecs.DatecsPrinterExtension;
-import de.wirecard.epos.extension.pax.a920.A920PaxTerminalExtension;
+import de.wirecard.epos.extension.pax.PaydroidTerminalExtension;
 import de.wirecard.epos.extension.spire.spm2.Spm2SpireTerminalExtension;
 import de.wirecard.epos.model.backend.Env;
 import de.wirecard.epos.model.user.UserCredentials;
@@ -41,7 +41,7 @@ public class EposSdkApplication extends MultiDexApplication {
                     .setCredentials(new UserCredentials(USERNAME, PASSWORD))
                     .addExtension(Spm2SpireTerminalExtension.getInstance())
                     .addExtension(DatecsPrinterExtension.getInstance())
-                    .addExtension(A920PaxTerminalExtension.getInstance())
+                    .addExtension(PaydroidTerminalExtension.getInstance())
                     .build();
         }
 
