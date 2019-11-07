@@ -17,7 +17,7 @@ public final class Settings {
     }
 
     public static boolean isCashRegisterRequired() {
-        return loggedUser != null && loggedUser.getMerchant().getCashRegistersRequired();
+        return loggedUser != null && loggedUser.getMerchant() != null && loggedUser.getMerchant().getCashRegistersRequired();
     }
 
     public static void setCashRegister(Context context, String cashRegisterId, String cashRegisterName) {

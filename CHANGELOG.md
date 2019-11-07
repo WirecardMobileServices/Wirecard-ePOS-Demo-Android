@@ -1,10 +1,15 @@
 # Change Log
 All notable changes to Wirecard ePOS SDK are documented in this file.
 
-## [2.13.0] - 2019-09-06
+## [2.14.1] - 2019-11-07
 ### Added
 
 - EFT Card (SEPA) payments authorized by signature instead of PIN.
+
+## [2.14.0] - 2019-10-21
+### Added
+
+- ~~EFT Card (SEPA) payments authorized by signature instead of PIN.~~
 - Possibility to complete/modify an open sale during a different shift and/or using a different cash register.
 - Added getMerchantShop / getMerchantShops methods to UserManager
 - Added File Manager component (getFilesList, getFile, getFileRecord, getFilesCategories)
