@@ -1,6 +1,21 @@
 # Change Log
 All notable changes to Wirecard ePOS SDK are documented in this file.
 
+## [2.X.Y] - YYYY-MM-DD
+### Added
+
+- New payment methods: Terminal Authorization, Terminal Preauthorization, Terminal Preauthorization Supplement.
+- New payment actions: Reverse, Refund
+- New sale actions: Return, Close sale as failed, Close sale as canceled
+
+### Fixed
+
+- Handling of parallel events in payment process de/wirecard/eposdemo/PaymentMethodFragment.java:147
+
+### Changed
+
+- UI improvements mainly Sales section
+
 ## [2.14.1] - 2019-11-07
 ### Added
 

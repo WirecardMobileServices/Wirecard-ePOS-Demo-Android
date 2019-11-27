@@ -67,7 +67,7 @@
         />
 
     <TextView
-        android:id="@+id/paymentActionLabel"
+        android:id="@+id/saleActionLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -76,14 +76,14 @@
         android:text="@string/payment_actions"
         android:textSize="@dimen/action_button_font_size"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/paymentActionButtons"
+        app:layout_constraintBottom_toBottomOf="@+id/saleActionButtons"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/paymentActionButtons"
+        app:layout_constraintTop_toTopOf="@+id/saleActionButtons"
         tools:visibility="visible"
         />
 
     <LinearLayout
-        android:id="@+id/paymentActionButtons"
+        android:id="@+id/saleActionButtons"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -92,7 +92,7 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/paymentActionLabel"
+        app:layout_constraintStart_toEndOf="@+id/saleActionLabel"
         app:layout_constraintTop_toBottomOf="@+id/paymentDateTime"
         tools:visibility="visible"
         />
@@ -102,7 +102,7 @@
         android:id="@+id/paymentActionsGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="paymentActionLabel,paymentActionButtons"
+        app:constraint_referenced_ids="saleActionLabel,saleActionButtons"
         />
 
 </android.support.constraint.ConstraintLayout>

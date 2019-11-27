@@ -21,6 +21,7 @@
         android:lines="1"
         android:textSize="@dimen/action_button_font_size"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="Text #1"
         />
 

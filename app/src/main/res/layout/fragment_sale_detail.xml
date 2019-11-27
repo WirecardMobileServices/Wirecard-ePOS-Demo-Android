@@ -6,19 +6,16 @@
     android:layout_height="match_parent"
     >
 
-    <LinearLayout
-        android:id="@+id/paymentActionButtons"
+
+    <Spinner
+        android:id="@+id/saleActionsSpinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/paymentActionLabel"
-        app:layout_constraintTop_toBottomOf="@+id/paymentDateTime"
-        tools:layout_height="48dp"
-        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/saleActionButton"
+        app:layout_constraintEnd_toStartOf="@+id/saleActionButton"
+        app:layout_constraintStart_toEndOf="@+id/saleActionLabel"
+        app:layout_constraintTop_toTopOf="@+id/saleActionButton"
         />
 
     <ProgressBar
@@ -126,18 +123,20 @@
         />
 
     <TextView
-        android:id="@+id/paymentActionLabel"
+        android:id="@+id/saleActionLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:gravity="center_vertical|start"
         android:lines="1"
         android:text="Sale actions:"
         android:textSize="@dimen/action_button_font_size"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/paymentActionButtons"
+        app:layout_constraintBottom_toBottomOf="@+id/saleActionsSpinner"
+        app:layout_constraintEnd_toStartOf="@+id/saleActionsSpinner"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/paymentActionButtons"
+        app:layout_constraintTop_toTopOf="@+id/saleActionsSpinner"
         tools:visibility="visible"
         />
 
@@ -146,13 +145,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical|start"
         android:lines="1"
         android:text="Payments:"
         android:textSize="@dimen/action_button_font_size"
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/paymentActionButtons"
+        app:layout_constraintTop_toBottomOf="@+id/saleActionButton"
         tools:visibility="visible"
         />
 
@@ -160,7 +160,7 @@
         android:id="@+id/saleActionsGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="paymentActionLabel,paymentActionButtons"
+        app:constraint_referenced_ids="saleActionLabel,saleActionButton,saleActionsSpinner"
         />
 
     <android.support.constraint.Group
@@ -181,5 +181,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/paymentsLabel"
         tools:listitem="@layout/sale_payment_row"
+        />
+
+    <Button
+        android:id="@+id/saleActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Perform"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/saleActionsSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/paymentDateTime"
         />
 </android.support.constraint.ConstraintLayout>

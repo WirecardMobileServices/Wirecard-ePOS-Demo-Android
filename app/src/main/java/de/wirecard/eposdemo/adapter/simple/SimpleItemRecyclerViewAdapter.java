@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import de.wirecard.eposdemo.MainActivity;
 import de.wirecard.eposdemo.R;
 
 public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<de.wirecard.eposdemo.adapter.simple.SimpleItemViewHolder> {
@@ -23,10 +22,13 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<de.wirec
     private boolean selectable;
     private int selectedPosition = RecyclerView.NO_POSITION;
 
-    public SimpleItemRecyclerViewAdapter(@NonNull List<SimpleItem> values, @Nullable OnItemClickListener onItemClickListener) {
+    @Nullable
+    private Coloring coloring;
+
+    public SimpleItemRecyclerViewAdapter(@NonNull List<SimpleItem> values, boolean selectable, @Nullable Coloring coloring) {
         this.values = values;
-        this.onItemClickListener = onItemClickListener;
-        selectable = false;
+        this.selectable = selectable;
+        this.coloring = coloring;
     }
 
     public SimpleItemRecyclerViewAdapter(@NonNull List<SimpleItem> values) {
@@ -34,16 +36,11 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<de.wirec
         selectable = true;
     }
 
-    public SimpleItemRecyclerViewAdapter(@NonNull List<SimpleItem> values, boolean selectable) {
+    public SimpleItemRecyclerViewAdapter(@NonNull List<SimpleItem> values, @Nullable OnItemClickListener onItemClickListener, @Nullable Coloring coloring) {
         this.values = values;
-        this.selectable = selectable;
-    }
-
-    @NonNull
-    @Override
-    public SimpleItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.simple_list_item, parent, false);
-        return new SimpleItemViewHolder(view);
+        this.onItemClickListener = onItemClickListener;
+        selectable = false;
+        this.coloring = coloring;
     }
 
     @Override
@@ -54,14 +51,12 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<de.wirec
         changeVisibilityAndSetText(holder.getText3(), item.getText3());
         changeVisibilityAndSetText(holder.getText4(), item.getText4());
 
-        if ("COMPLETED".equals(item.getText2()))
-            holder.getText2().setTextColor(MainActivity.GREEN);
-        if ("FAILED".equals(item.getText2()))
-            holder.getText2().setTextColor(MainActivity.RED);
-        if ("RETURNED".equals(item.getText2()))
-            holder.getText2().setTextColor(MainActivity.BLUE);
-        if ("UNCONFIRMED".equals(item.getText2()))
-            holder.getText2().setTextColor(MainActivity.YELLOW);
+        if (coloring != null) {
+            holder.getText1().setTextColor(coloring.getText1Color(item.getText1()));
+            holder.getText2().setTextColor(coloring.getText2Color(item.getText2()));
+            holder.getText3().setTextColor(coloring.getText3Color(item.getText3()));
+            holder.getText4().setTextColor(coloring.getText4Color(item.getText4()));
+        }
 
         holder.itemView.setSelected(selectedPosition == position);
         if (selectable) {
@@ -77,6 +72,24 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<de.wirec
                     onItemClickListener.onItemClick(v, position);
             });
         }
+    }
+
+
+    @NonNull
+    @Override
+    public SimpleItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.simple_list_item, parent, false);
+        return new SimpleItemViewHolder(view);
+    }
+
+    public interface Coloring {
+        int getText1Color(String text);
+
+        int getText2Color(String text);
+
+        int getText3Color(String text);
+
+        int getText4Color(String text);
     }
 
     private void changeVisibilityAndSetText(TextView view, String value) {

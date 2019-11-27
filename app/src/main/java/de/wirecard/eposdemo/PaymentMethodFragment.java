@@ -30,13 +30,16 @@ import de.wirecard.epos.EposSDK;
 import de.wirecard.epos.model.sale.builder.PurchaseRequest;
 import de.wirecard.epos.model.sale.builder.Request;
 import de.wirecard.epos.model.sale.builder.TerminalAuthorizationRequest;
+import de.wirecard.epos.model.sale.builder.TerminalPreAuthorizationRequest;
 import de.wirecard.epos.model.sale.builder.payment.APurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.CardPurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.CardTerminalAuthorizationPayment;
+import de.wirecard.epos.model.sale.builder.payment.CardTerminalPreAuthorizationPayment;
 import de.wirecard.epos.model.sale.builder.payment.CashPurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.EftCardPurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.PurchasePayment;
 import de.wirecard.epos.model.sale.builder.payment.TerminalAuthorizationPayment;
+import de.wirecard.epos.model.sale.builder.payment.TerminalPreAuthorizationPayment;
 import de.wirecard.epos.model.sale.sales.SaleItem;
 import de.wirecard.epos.model.sale.sales.SaleItemType;
 import de.wirecard.epos.util.TaxUtils;
@@ -105,7 +108,7 @@ public class PaymentMethodFragment extends AbsFragment<View> implements OnPaymen
     private void initViews() {
         openSaleCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> refreshAmount());
 
-        List<AppPayment> supportedPaymentMethods = Arrays.asList(AppPayment.CASH, AppPayment.CARD, AppPayment.TERMINAL_AUTHORIZATION, AppPayment.EFT_CARD);
+        List<AppPayment> supportedPaymentMethods = Arrays.asList(AppPayment.CASH, AppPayment.CARD, AppPayment.TERMINAL_AUTHORIZATION, AppPayment.TERMINAL_PREAUTHORIZATION, AppPayment.EFT_CARD);
         PaymentMethodAdapter paymentMethodAdapter = new PaymentMethodAdapter(supportedPaymentMethods, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(paymentMethodAdapter);
@@ -144,28 +147,20 @@ public class PaymentMethodFragment extends AbsFragment<View> implements OnPaymen
         addDisposable(eventRelay
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(event -> {
-                    if (event instanceof TerminalEvent) {
-                        if (event instanceof TerminalEvent.SignatureRequest) {
-                            //I'll just send any image encoded in base64
-                            ((TerminalEvent.SignatureRequest) event).signatureEntered(signatureImageInBase64.getBytes());
-                        }
-                        else if (event instanceof TerminalEvent.AppSignatureConfirmation) {
-                            //I'll confirm signature
-                            ((TerminalEvent.AppSignatureConfirmation) event).signatureConfirmed();
-                        }
-                        else if (event instanceof TerminalEvent.SignatureConfirmation) {
-                            //do nothing, terminal shows confirmation of signature
-                            update.setText("signature confirmation on terminal side");
-                        }
-                        else if (event instanceof Event.Update) {
-                            update.setText(((Event.Update) event).getMessage(getContext()));
-                        }
-                        else if (event instanceof TerminalEvent.PaymentInfo) {
-                            update.setText(((TerminalEvent.PaymentInfo) event).getPanTag());
-                        }
-                        else {
-                            update.setText("Unknown event: " + event.toString());
-                        }
+                    if (event instanceof TerminalEvent.SignatureRequest) {
+                        //I'll just send any image encoded in base64
+                        ((TerminalEvent.SignatureRequest) event).signatureEntered(signatureImageInBase64.getBytes());
+                    }
+                    else if (event instanceof TerminalEvent.AppSignatureConfirmation) {
+                        //I'll confirm signature
+                        ((TerminalEvent.AppSignatureConfirmation) event).signatureConfirmed();
+                    }
+                    else if (event instanceof TerminalEvent.SignatureConfirmation) {
+                        //do nothing, terminal shows confirmation of signature
+                        update.setText("signature confirmation on terminal side");
+                    }
+                    else if (event instanceof TerminalEvent.PaymentInfo) {
+                        update.setText(((TerminalEvent.PaymentInfo) event).getPanTag());
                     }
                     else if (event instanceof Event.Update) {
                         update.setText(((Event.Update) event).getMessage(getContext()));
@@ -203,8 +198,9 @@ public class PaymentMethodFragment extends AbsFragment<View> implements OnPaymen
 
         update.setVisibility(View.VISIBLE);
 
-        String cashRegisterId = Settings.getCashRegisterId(getContext());
+        String cashRegisterId = null;
         if (Settings.isCashRegisterRequired()) {
+            cashRegisterId = Settings.getCashRegisterId(getContext());
             if (cashRegisterId == null) {
                 Toast.makeText(getContext(), R.string.cash_register_error, Toast.LENGTH_LONG).show();
                 loadingFinished();
@@ -247,6 +243,9 @@ public class PaymentMethodFragment extends AbsFragment<View> implements OnPaymen
         else if (request instanceof TerminalAuthorizationRequest) {
             purchaseOperation = eposSdk.sales().operation().purchase((TerminalAuthorizationRequest) request);
         }
+        else if (request instanceof TerminalPreAuthorizationRequest) {
+            purchaseOperation = eposSdk.sales().operation().purchase((TerminalPreAuthorizationRequest) request);
+        }
 
         if (purchaseOperation != null)
             addDisposable(
@@ -275,6 +274,8 @@ public class PaymentMethodFragment extends AbsFragment<View> implements OnPaymen
             payment = new CashPurchasePayment(amountValue);
         else if (appPayment == AppPayment.TERMINAL_AUTHORIZATION)
             payment = new CardTerminalAuthorizationPayment(amountValue);
+        else if (appPayment == AppPayment.TERMINAL_PREAUTHORIZATION)
+            payment = new CardTerminalPreAuthorizationPayment(amountValue);
         else if (appPayment == AppPayment.EFT_CARD)
             payment = new EftCardPurchasePayment(amountValue);
 
@@ -310,6 +311,22 @@ public class PaymentMethodFragment extends AbsFragment<View> implements OnPaymen
                     null,
                     cashRegisterId,
                     (TerminalAuthorizationPayment) payment,
+                    saleItem,
+                    true,
+                    null
+            );
+        }
+        else if (payment instanceof TerminalPreAuthorizationPayment) {
+            request = new TerminalPreAuthorizationRequest(
+                    saleAmount,
+                    CURRENCY.getCurrencyCode(),
+                    "demo terminal preauthorization note",
+                    null,
+                    null,
+                    null,
+                    null,
+                    cashRegisterId,
+                    (TerminalPreAuthorizationPayment) payment,
                     saleItem,
                     true,
                     null

@@ -30,6 +30,7 @@ import de.wirecard.epos.model.with.With;
 import de.wirecard.epos.model.with.WithPagination;
 import de.wirecard.eposdemo.adapter.simple.SimpleItem;
 import de.wirecard.eposdemo.adapter.simple.SimpleItemRecyclerViewAdapter;
+import de.wirecard.eposdemo.utils.DesignUtils;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 import static de.wirecard.eposdemo.EposSdkApplication.CURRENCY;
@@ -207,38 +208,27 @@ public class ShiftsFragment extends AbsFragment<RecyclerView> {
         builder.show();
     }
 
-    private void loadShifts() {
-        if (Settings.getCashRegisterId(getContext()) == null) {
-            showError(getString(R.string.cash_register_error));
-            return;
+    SimpleItemRecyclerViewAdapter.Coloring coloring = new SimpleItemRecyclerViewAdapter.Coloring() {
+        @Override
+        public int getText1Color(String text) {
+            return MainActivity.DEFAULT;
         }
-        showLoading();
-        WithPagination withPagination = With.pagination()
-                .page(0)
-                .size(20)
-                .includeResponseFields("id","openTime","closeTime","closingAmount","status")
-                .sort("closeTime", WithPagination.Order.DESC);
-        addDisposable(
-                EposSdkApplication.getEposSdk()
-                        .cash()
-                        .getCashRegisterShifts(Settings.getCashRegisterId(getContext()),withPagination)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(items -> {
-                            cashRegisterShifts = items;
-                            final List<SimpleItem> simpleItems = Stream.of(items)
-                                    .map(item ->
-                                            new SimpleItem(
-                                                    formatter.format(item.getOpenTime()),
-                                                    item.getStatus().toString(),
-                                                    item.getClosingAmount() != null ? nf.format(item.getClosingAmount()) : getString(R.string.none),
-                                                    item.getCloseTime() != null ? formatter.format(item.getCloseTime()) : null
-                                            )
-                                    ).collect(Collectors.toList());
-                            loadingFinishedAndShowRecycler(new SimpleItemRecyclerViewAdapter(simpleItems, false));
-                            refresh();
-                        }, showErrorInsteadContent())
-        );
-    }
+
+        @Override
+        public int getText2Color(String text) {
+            return DesignUtils.getShiftStatusColor(text);
+        }
+
+        @Override
+        public int getText3Color(String text) {
+            return MainActivity.DEFAULT;
+        }
+
+        @Override
+        public int getText4Color(String text) {
+            return MainActivity.DEFAULT;
+        }
+    };
 
     private void refresh() {
         if (isLastShiftOpen()) {
@@ -279,5 +269,38 @@ public class ShiftsFragment extends AbsFragment<RecyclerView> {
         openClose.setEnabled(true);
         payIn.setEnabled(true);
         payOut.setEnabled(true);
+    }
+
+    private void loadShifts() {
+        if (Settings.getCashRegisterId(getContext()) == null) {
+            showError(getString(R.string.cash_register_error));
+            return;
+        }
+        showLoading();
+        WithPagination withPagination = With.pagination()
+                .page(0)
+                .size(20)
+                .includeResponseFields("id", "openTime", "closeTime", "closingAmount", "status")
+                .sort("closeTime", WithPagination.Order.DESC);
+        addDisposable(
+                EposSdkApplication.getEposSdk()
+                        .cash()
+                        .getCashRegisterShifts(Settings.getCashRegisterId(getContext()), withPagination)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(items -> {
+                            cashRegisterShifts = items;
+                            final List<SimpleItem> simpleItems = Stream.of(items)
+                                    .map(item ->
+                                            new SimpleItem(
+                                                    formatter.format(item.getOpenTime()),
+                                                    item.getStatus().toString(),
+                                                    item.getClosingAmount() != null ? nf.format(item.getClosingAmount()) : getString(R.string.none),
+                                                    item.getCloseTime() != null ? formatter.format(item.getCloseTime()) : null
+                                            )
+                                    ).collect(Collectors.toList());
+                            loadingFinishedAndShowRecycler(new SimpleItemRecyclerViewAdapter(simpleItems, false, coloring));
+                            refresh();
+                        }, showErrorInsteadContent())
+        );
     }
 }

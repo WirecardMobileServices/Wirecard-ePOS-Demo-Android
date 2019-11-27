@@ -21,6 +21,7 @@ import de.wirecard.epos.model.with.WithPagination;
 import de.wirecard.eposdemo.adapter.simple.OnItemClickListener;
 import de.wirecard.eposdemo.adapter.simple.SimpleItem;
 import de.wirecard.eposdemo.adapter.simple.SimpleItemRecyclerViewAdapter;
+import de.wirecard.eposdemo.utils.DesignUtils;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class SalesFragment extends AbsFragment<RecyclerView> implements OnItemClickListener {
@@ -41,6 +42,41 @@ public class SalesFragment extends AbsFragment<RecyclerView> implements OnItemCl
         super.onViewCreated(view, savedInstanceState);
         content.setLayoutManager(new LinearLayoutManager(getContext()));
         loadSales();
+    }
+
+    SimpleItemRecyclerViewAdapter.Coloring coloring = new SimpleItemRecyclerViewAdapter.Coloring() {
+        @Override
+        public int getText1Color(String text) {
+            return MainActivity.DEFAULT;
+        }
+
+        @Override
+        public int getText2Color(String text) {
+            return DesignUtils.getSaleStatusColor(text);
+        }
+
+        @Override
+        public int getText3Color(String text) {
+            return MainActivity.DEFAULT;
+        }
+
+        @Override
+        public int getText4Color(String text) {
+            return MainActivity.DEFAULT;
+        }
+    };
+
+    @Override
+    public void onItemClick(View view, int position) {
+        final Sale sale = saleLights.get(position);
+        SaleDetailFragment saleDetailFragment = new SaleDetailFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(MainActivity.SALE, sale);
+        saleDetailFragment.setArguments(args);
+        FragmentActivity activity = getActivity();
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).changeScreenWithBack(saleDetailFragment, saleDetailFragment.getClass().getSimpleName());
+        }
     }
 
     private void loadSales() {
@@ -65,21 +101,8 @@ public class SalesFragment extends AbsFragment<RecyclerView> implements OnItemCl
                                                     item.getInitialized().format(formatter)
                                             )
                                     ).collect(Collectors.toList());
-                            loadingFinishedAndShowRecycler(new SimpleItemRecyclerViewAdapter(simpleItems, this));
+                            loadingFinishedAndShowRecycler(new SimpleItemRecyclerViewAdapter(simpleItems, this, coloring));
                         }, showErrorInsteadContent())
         );
-    }
-
-    @Override
-    public void onItemClick(View view, int position) {
-        final Sale sale = saleLights.get(position);
-        SaleDetailFragment saleDetailFragment = new SaleDetailFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(MainActivity.SALE, sale);
-        saleDetailFragment.setArguments(args);
-        FragmentActivity activity = getActivity();
-        if (activity instanceof MainActivity) {
-            ((MainActivity) activity).changeScreenWithBack(saleDetailFragment, saleDetailFragment.getClass().getSimpleName());
-        }
     }
 }

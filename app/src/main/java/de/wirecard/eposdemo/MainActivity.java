@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final int RED = Color.parseColor("#FF0000");
     public static final int BLUE = Color.parseColor("#0000FF");
     public static final int YELLOW = Color.parseColor("#FF7F0E");
+    public static final int DEFAULT = Color.parseColor("#FF333333");
 
     private int selectedMenu = -1;
 

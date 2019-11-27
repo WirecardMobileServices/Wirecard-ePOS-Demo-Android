@@ -4,6 +4,7 @@ public enum AppPayment {
     CASH("Cash"),
     CARD("Card"),
     TERMINAL_AUTHORIZATION("Terminal authorization"),
+    TERMINAL_PREAUTHORIZATION("Terminal preauthorization"),
     EFT_CARD("Eft card")
     ;
 
