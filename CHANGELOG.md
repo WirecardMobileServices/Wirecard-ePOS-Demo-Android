@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to Wirecard ePOS SDK are documented in this file.
 
-## [2.X.Y] - YYYY-MM-DD
+## [2.15.0] - 2020-01-08
 ### Added
 
 - New payment methods: Terminal Authorization, Terminal Preauthorization, Terminal Preauthorization Supplement.
