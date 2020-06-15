@@ -1,9 +1,9 @@
 package de.wirecard.eposdemo.adapter.simple;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
 import de.wirecard.eposdemo.R;
 
 public class SimpleItemViewHolder extends RecyclerView.ViewHolder {

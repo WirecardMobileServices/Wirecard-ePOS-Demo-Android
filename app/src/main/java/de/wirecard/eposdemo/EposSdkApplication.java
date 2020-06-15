@@ -1,10 +1,10 @@
 package de.wirecard.eposdemo;
 
-import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 
 import java.util.Currency;
 
+import androidx.multidex.MultiDexApplication;
 import de.wirecard.epos.EposSDK;
 import de.wirecard.epos.EposSdkBuilder;
 import de.wirecard.epos.extension.datecs.DatecsPrinterExtension;

@@ -1,6 +1,6 @@
 package de.wirecard.eposdemo.adapter.simple;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public class SimpleItem {
     @Nullable

@@ -1,7 +1,6 @@
 package de.wirecard.eposdemo.utils;
 
-import android.support.annotation.Nullable;
-
+import androidx.annotation.Nullable;
 import de.wirecard.epos.model.cashregisters.shift.CashRegisterShiftStatus;
 import de.wirecard.epos.model.sale.sales.SaleStatus;
 import de.wirecard.epos.model.sale.sales.payment.PaymentStatus;
