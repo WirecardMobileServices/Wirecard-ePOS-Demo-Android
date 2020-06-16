@@ -2,6 +2,7 @@
 All notable changes to Wirecard ePOS SDK are documented in this file.
 
 ## [2.16.0] - 2020-06-15
+
 ### Added
 
 - Adopted PSD2 requirements for Strong customer authentication (SCA)
@@ -16,6 +17,7 @@ All notable changes to Wirecard ePOS SDK are documented in this file.
 - replaced long Spire extension card terminal message "Waiting for insert, swipe or tap" with "Please present card"
 
 ## [2.15.0] - 2020-01-08
+
 ### Added
 
 - New payment methods: Terminal Authorization, Terminal Preauthorization, Terminal Preauthorization Supplement.
@@ -31,11 +33,13 @@ All notable changes to Wirecard ePOS SDK are documented in this file.
 - UI improvements mainly Sales section
 
 ## [2.14.1] - 2019-11-07
+
 ### Added
 
 - EFT Card (SEPA) payments authorized by signature instead of PIN.
 
 ## [2.14.0] - 2019-10-21
+
 ### Added
 
 - ~~EFT Card (SEPA) payments authorized by signature instead of PIN.~~
@@ -55,6 +59,7 @@ All notable changes to Wirecard ePOS SDK are documented in this file.
 - A920PaxTerminalExtension class renamed to PaydroidTerminalExtension
 
 ## [2.13.0] - 2019-09-06
+
 ### Added
 
 - PAX A920 terminal support - Visa, MC, JCB, UPI certified
@@ -63,6 +68,7 @@ All notable changes to Wirecard ePOS SDK are documented in this file.
 - minor bug fixes
 
 ## [2.12.0] - 2019-08-20
+
 ### Added
 - New payment method: EFT Card payment
 - Include Notification (Callback) URL in Sale Purchase request
@@ -72,6 +78,7 @@ All notable changes to Wirecard ePOS SDK are documented in this file.
 - minor bug fixes
 
 ## [2.11.0] - 2019-05-29
+
 ### Added
 - Receipt supports footer logo and small receipt optimalizations
 - Card Authorisation and Card Capture as new payment methods
@@ -81,6 +88,7 @@ All notable changes to Wirecard ePOS SDK are documented in this file.
 - minor bug fixes
 
 ## [2.10.0] - 2019-04-17
+
 ### Added
 - Multitender support: Combining payment methods into one Sale
 - Referenced sale request: References the Original Sale to process another payment
