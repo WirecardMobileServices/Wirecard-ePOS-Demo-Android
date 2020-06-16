@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to Wirecard ePOS SDK are documented in this file.
 
+## [2.16.0] - 2020-06-15
+### Added
+
+- Adopted PSD2 requirements for Strong customer authentication (SCA)
+
+### Fixed
+
+- Wrong POS Entry mode for Visa contactless transactions
+
+### Changed
+
+- support annotations migrated to androidx
+- replaced long Spire extension card terminal message "Waiting for insert, swipe or tap" with "Please present card"
+
 ## [2.15.0] - 2020-01-08
 ### Added
 
